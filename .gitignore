@@ -1,0 +1,18 @@
+
+# OS / Python junk
+.DS_Store
+__pycache__/
+.ipynb_checkpoints/
+
+# Large data files (keep outside repo for public release)
+*.h5ad
+*.h5
+*.parquet
+*.rds
+*.loom
+*.pkl
+*.npy
+*.npz
+*.zarr
+*.tsv
+*.mtx
