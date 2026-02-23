@@ -258,24 +258,6 @@ do_cluster <- function(
 }
 
 
-# name_clusters <- function(obj, cluster_name, new_name, name_list) {
-# #     message('TODO: include error checking into name_clusters')
-#     clusters <- obj$clusters_df[, cluster_name]
-#     cluster_labels <- Reduce(rbind, lapply(names(name_list), function(y) {
-#         data.table(cell_type = y, cluster_ids = name_list[[y]])
-#     }))
-#     res <- data.table(cluster_ids = clusters) %>%
-#         dplyr::left_join(cluster_labels, by = "cluster_ids") %>% 
-#         dplyr::select(-cluster_ids) %>% 
-#         with(cell_type)
-    
-#     if (length(res) != nrow(obj$meta_data)) {
-#         stop('cluster names dont match number of cells in meta_data')
-#     }
-#     obj$meta_data[new_name] <- res
-#     return(obj)
-# }
-
 do_scatter <- function (umap_use, meta_data, label_name, facet_var, no_guides = TRUE, 
     do_labels = TRUE, nice_names, palette_use = colors_overload, 
     pt_size = 4, point_size = 0.5, pt_shape = ".", base_size = 20, 
@@ -391,9 +373,6 @@ quantileSparse <- function(.x, qlist) {
     res
 }
 
-## TODO: test is feature is present
-## TODO: allow for different cutoffs, for each marker
-## TODO: somehow draw canvas first, then do plotting? 
 library(patchwork)
 library(ggthemes)
 

@@ -2,15 +2,20 @@ require(baysorrr)
 require(tidyverse)
 require(glue)
 
-
-
-dirs = c('/n/data1/bwh/medicine/korsunsky/lab/data/BroadCancer/Nghia_Crescendo_cell_segmentations_C110/HuColonCancer_CC3_C110PFA_VS13_A11_MT_12-07-2021/', '/n/data1/bwh/medicine/korsunsky/lab/data/BroadCancer/Nghia_Crescendo_cell_segmentations_C110/HuColonCancer_VS13_CC3_C110_FFPE_A6_12-13-2021/', '/n/data1/bwh/medicine/korsunsky/lab/data/BroadCancer/Nghia_Crescendo_cell_segmentations_C110/HuColonCancer_VS13_CC3_C110PFA_MT_A6_11-19-2021/')
+# ---- CONFIGURATION ----
+# Set these paths before running
+baysor_binpath = "path/to/baysor"          # path to Baysor binary (e.g. ~/.julia/bin/baysor)
+dirs = c(
+    "path/to/sample1/crescendo_segmentation/",  # directory containing cellpose_tx_annotation.csv
+    "path/to/sample2/crescendo_segmentation/",
+    "path/to/sample3/crescendo_segmentation/"
+)
+# -----------------------
 
 for (dir in dirs){
     tx = readr::read_delim(glue::glue(dir, '/cellpose_tx_annotation.csv')) %>% rename('x' = global_x, 'y' = global_y, 'z' = global_z, 'cell' = cellID) %>% select(x, y, gene, cell,)
     head(tx)
 
-    baysor_binpath = '/home/mup728/.julia/bin/baysor'
     output_dir = dir
     n_clusters = 10
     prior_segmentation_confidence = 0.7
@@ -48,7 +53,6 @@ for (dir in dirs){
  # finish and clean up 
 
 
-baysor_binpath = '/home/mup728/.julia/bin/baysor'
 output_dir = dir
 n_clusters = 10
 prior_segmentation_confidence = 0.7
