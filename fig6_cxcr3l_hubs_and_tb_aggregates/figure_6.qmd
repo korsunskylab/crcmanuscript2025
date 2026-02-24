@@ -1,0 +1,521 @@
+---
+title: "Figure 6 - CXCR3L+ hubs are different from dense TB+ aggregates."
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: show
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+# Load packages and data
+source(here::here("src/rload.R"))
+```
+
+## Figure 6A
+```{r}
+#| label: fig-6a
+#| fig-width: 6
+#| fig-height: 4
+
+# Made in Adobe Illustrator
+knitr::include_graphics("../figures_ai/Fig6A.png")
+```
+
+## Figure 6B
+
+```{r}
+#| label: fig-6b
+#| fig-width: 2.75
+#| fig-height: 3.25
+#| fig-dpi: 300
+
+# set order of x-axis pathology annotations
+x_ord <- c(
+  "tumor",
+  "non_neoplastic_mucosa",
+  "non_neoplastic_other",
+  "lymphoid_structure"
+)
+
+# Create a bar plot for the total counts in each pathology region
+ggdf_counts <- annots %>%
+  mutate(
+    path_reg = case_when(
+      grepl("tumor", pathology_region) ~ "tumor",
+      TRUE ~ pathology_region
+    )
+  ) %>%
+  group_by(path_reg) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  mutate(path_reg = factor(path_reg, levels = x_ord))
+
+plt1 <- ggdf_counts %>%
+  ggplot(mapping = aes(x = path_reg, y = count, fill = path_reg)) +
+  geom_bar(stat = "identity") +
+  strip_x_axis() +
+  scale_y_continuous(
+    expand = c(0, 0),
+    labels = label_scientific(),
+    trans = "log10"
+  ) +
+  scale_fill_manual(values = cmap_path_annot) +
+  labs(y = "Count") +
+  theme(
+    panel.grid.major = element_blank(),
+    legend.position = "none"
+  )
+
+# Create a boxplot of TB +ve frequency in each pathology region
+# 1. Group all tumor pathology subsets into a single tumor structure
+# 2. Count the number of TB+ve and TB-ve cells in each pathology region
+# 3. Calculate the frequency of TB+ve cells in each pathology region
+ggdf <- annots %>%
+  mutate(
+    path_reg = case_when(
+      grepl("tumor", pathology_region) ~ "tumor",
+      TRUE ~ pathology_region
+    )
+  ) %>%
+  group_by(PatientID, TB_pos_tile, path_reg) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  group_by(PatientID, path_reg) %>%
+  mutate(
+    total_count = sum(count),
+    freq = count / total_count
+  ) %>%
+  filter(TB_pos_tile == "TB_pos") %>%
+  mutate(
+    path_reg = factor(path_reg, levels = x_ord)
+  )
+
+# Create plot
+plt2 <- ggdf %>%
+  ggplot(mapping = aes(x = path_reg, y = freq, group = path_reg, fill = path_reg)) +
+  geom_boxplot(
+    outlier.shape = NA,
+    lwd = 0.5, median.linewidth = 0.5
+  ) +
+  geom_point(
+    position = position_jitter(width = 0.15),
+    size = 1, stroke = 0.25
+  ) +
+  scale_x_discrete(
+    labels = c(
+      "Tumor",
+      "Non-neo.\nmuc.",
+      "Non-neo.\nother",
+      "Lymphoid\nstructure"
+    )
+  ) +
+  scale_fill_manual(values = cmap_path_annot) +
+  labs(
+    x = "Pathology region",
+    y = "TB-mask+ cells\n(of all cells in region)"
+  ) +
+  vertical_x_text() +
+  theme(legend.position = "none")
+
+plt <- plt1 + plt2 +
+  plot_layout(heights = c(0.4, 0.5))
+
+plt
+```
+
+## Figure 6C
+
+```{r}
+#| label: fig-6c
+#| fig-width: 15
+#| fig-height: 6
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  filter(PatientID == "G4423") %>%
+  mutate(color_annot = ifelse(
+    grepl("TB_", TB_pathology_region),
+    TB_pathology_region, "Other"
+  )) %>%
+  rotate_xy(angle_deg = 142) %>%
+  arrange(color_annot)
+plt <- ggdf %>%
+  ggplot(mapping = aes(x = x_rotated, y = y_rotated, fill = color_annot)) +
+  geom_point_rast(size = 0.2, shape = 21, stroke = NA) +
+  scale_fill_manual(values = c(
+    "TB_other" = "green",
+    "TB_peritumor" = "purple",
+    "TB_intratumor" = "magenta",
+    "Other" = "grey10"
+  )) +
+  theme_void() +
+  theme(legend.position = "none")
+
+plt <- add_scale_bar(plt, scale_len = 1000, scale_width = 1.5, text_size = 0)
+
+plt
+```
+
+## Figure 6D
+
+```{r}
+#| label: fig-6d
+#| fig-width: 3
+#| fig-height: 2.5
+#| fig-dpi: 300
+
+ggdf1 <- annots %>%
+  filter(grepl("TB", TB_pathology_region)) %>%
+  group_by(TB_pathology_region, TB_niche) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  rename(
+    group = TB_pathology_region,
+    niche = TB_niche
+  )
+
+# ggdf of anti tumor hub niches
+ggdf2 <- annots %>%
+  filter(
+    cxcl_pos_tile == "CXCL_pos",
+    cxcl_niche != ""
+  ) %>%
+  group_by(cxcl_niche, cxcl_niche_comp) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  rename(
+    group = cxcl_niche_comp,
+    niche = cxcl_niche
+  )
+
+ggdf <- bind_rows(ggdf1, ggdf2) %>%
+  mutate(
+    group = factor(group,
+      levels = c(
+        "TB_other", "TB_peritumor", "TB_intratumor",
+        "mixed", "stromal_only", "epithelial_only"
+      )
+    )
+  )
+
+# Define pairwise comparisons for stat_compare_means
+comparisons <- list(
+  c("TB_other", "TB_peritumor"),
+  c("TB_other", "TB_intratumor"),
+  c("TB_peritumor", "TB_intratumor"),
+  c("TB_intratumor", "mixed"),
+  c("TB_intratumor", "stromal_only"),
+  c("TB_intratumor", "epithelial_only")
+)
+
+plt <- ggdf %>%
+  ggplot(mapping = aes(x = group, y = n)) +
+  geom_violin(scale = "width") +
+  geom_point(
+    position = position_jitter(width = 0.1),
+    size = 1.5, alpha = 0.25, stroke = NA
+  ) +
+  geom_boxplot(
+    color = "red",
+    outlier.shape = NA, alpha = 0.5,
+    fill = NA, lwd = 0.35, median.linewidth = 0.5, width = 0.15
+  ) +
+  ggpubr::stat_compare_means(
+    comparisons = comparisons,
+    method = "wilcox.test",
+    label = "p.signif",
+    size = 2.5
+  ) +
+  scale_x_discrete(
+    labels = c(
+      "TB\ndistant", "TB\nperitumor", "TB\nintratumor",
+      "mixed", "stromal\nonly", "epithelial\nonly"
+    )
+  ) +
+  scale_y_continuous(trans = "log10", labels = label_scientific()) +
+  labs(
+    x = NULL,
+    y = "log10(Cells per niche)"
+  ) +
+  vertical_x_text()
+
+plt
+```
+
+## Figure 6E
+
+```{r}
+#| label: fig-6e
+#| fig-width: 3.5
+#| fig-height: 1
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  filter(
+    grepl("tumor", pathology_region),
+    tessera_annotation %in% c("epithelial_tile", "stromal_tile"),
+    cxcl_niche_comp != ""
+  ) %>%
+  group_by(tessera_annotation, cxcl_pos_tile, TB_pos_tile, cxcl_niche_comp) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  mutate(
+    annot_group = case_when(
+      (cxcl_niche_comp == "mixed") &
+        (cxcl_pos_tile == "CXCL_pos") ~ "mixed_pos",
+      (cxcl_niche_comp == "mixed") &
+        (cxcl_pos_tile == "CXCL_neg") &
+        (tessera_annotation == "stromal_tile") ~ "stromal_neg",
+      (cxcl_niche_comp == "mixed") &
+        (cxcl_pos_tile == "CXCL_neg") &
+        (tessera_annotation == "epithelial_tile") ~ "epi_neg",
+      (tessera_annotation == "stromal_tile") &
+        (cxcl_niche_comp == "stromal_only") &
+        (cxcl_pos_tile == "CXCL_neg") ~ "stromal_neg",
+      (tessera_annotation == "stromal_tile") &
+        (cxcl_niche_comp == "stromal_only") &
+        (cxcl_pos_tile == "CXCL_pos") ~ "stromal_pos",
+      (tessera_annotation == "epithelial_tile") &
+        (cxcl_niche_comp == "epithelial_only") &
+        (cxcl_pos_tile == "CXCL_neg") ~ "epi_neg",
+      (tessera_annotation == "epithelial_tile") &
+        (cxcl_niche_comp == "epithelial_only") &
+        (cxcl_pos_tile == "CXCL_pos") ~ "epi_pos",
+    )
+  ) %>%
+  mutate(
+    annot_group = factor(
+      annot_group,
+      levels = c("stromal_neg", "stromal_pos", "mixed_pos", "epi_pos", "epi_neg")
+    ),
+    TB_pos_tile = factor(
+      TB_pos_tile,
+      levels = c("TB_pos", "TB_neg")
+    )
+  ) %>%
+  arrange(annot_group, TB_pos_tile)
+
+plt <- ggdf %>%
+  ggplot(mapping = aes(x = n, y = TB_pos_tile, fill = annot_group)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_fill_manual(
+    values = c(
+      "stromal_neg" = "#17527d",
+      "stromal_pos" = "#02b1f6",
+      "mixed_pos" = "#bd202e",
+      "epi_pos" = "#d45f00",
+      "epi_neg" = "#ab8335"
+    ),
+    labels = c(
+      "Stroma-Neg", "Stromal hub",
+      "Interface hub", "Epi hub",
+      "Epi-neg"
+    )
+  ) +
+  labs(
+    x = "Proportion of cells\nin indicated CXCR3L mask types",
+    y = NULL,
+    fill = NULL
+  )
+
+
+plt
+```
+
+## Figure 6F
+```{r}
+#| label: fig-6f
+#| fig-width: 3.25
+#| fig-height: 2
+#| fig-dpi: 300
+
+glmm_res <- fread(here(
+  outdir,
+  "GLMM_tables",
+  "GLMM_TBCXCLhub_TBintratumor_vs_all_Tcells.csv"
+)) %>%
+  filter(!grepl("_intercept", rowname)) %>%
+  mutate(comp_group = gsub("TB_intratumor-", "", comparison))
+
+# ggdf for frequency of immune cells in each TB region
+ggdf1 <- annots %>%
+  filter(TB_pathology_region %in% c("TB_other", "TB_peritumor", "TB_intratumor")) %>%
+  # Merge tumor path_regions together
+  mutate(
+    path_reg = case_when(
+      grepl("tumor_", TB_pathology_region) ~ "tumor",
+      TRUE ~ TB_pathology_region
+    )
+  ) %>%
+  # Filter for T cells only
+  filter(KNN_Mid %in% c("Tcd4", "Tcd8", "Tplzf")) %>%
+  # Calculate the # of each cell type in each annotation
+  group_by(PatientID, KNN_celltype_v2, path_reg, MMRstatus) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  # Calculate the total # of each cell group in the annotation
+  group_by(PatientID, path_reg) %>%
+  mutate(
+    total_count = sum(n),
+    freq = n / total_count
+  ) %>%
+  ungroup() %>%
+  rename(annot_group = path_reg)
+
+# ggdf for frequency of immune cells in mixed niche
+ggdf2 <- annots %>%
+  filter(
+    cxcl_pos_tile == "CXCL_pos",
+    cxcl_niche_comp != "",
+    KNN_Mid %in% c("Tcd4", "Tcd8", "Tplzf")
+  ) %>%
+  group_by(PatientID, KNN_celltype_v2, cxcl_niche_comp, MMRstatus) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  group_by(PatientID, cxcl_niche_comp, MMRstatus) %>%
+  mutate(
+    total_count = sum(n),
+    freq = n / total_count
+  ) %>%
+  ungroup() %>%
+  rename(annot_group = cxcl_niche_comp)
+
+ggdf <- bind_rows(ggdf1, ggdf2) %>%
+  filter(annot_group %out% c("epithelial_only")) %>%
+  group_by(KNN_celltype_v2, annot_group) %>%
+  summarize(median_freq = median(freq), .groups = "drop") %>%
+  group_by(KNN_celltype_v2) %>%
+  mutate(z_score = scale(median_freq)[, 1]) %>%
+  ungroup()
+
+ord <- get_heatmap_hclust(
+  df_input = ggdf,
+  x_col = "annot_group",
+  y_col = "KNN_celltype_v2",
+  fill_col = "z_score"
+)
+
+# Set x_col order:
+ord$x_order <- rev(c(
+  "TB_other", "TB_peritumor", "TB_intratumor",
+  "mixed", "stromal_only"
+))
+
+# Create heatmap
+plt1 <- ggdf %>%
+  left_join(
+    glmm_res,
+    by = c(
+      "KNN_celltype_v2" = "rowname",
+      "annot_group" = "comp_group"
+    )
+  ) %>%
+  mutate(
+    sig = ifelse(padj < 0.05, "*", ""),
+    KNN_celltype_v2 = factor(KNN_celltype_v2, levels = ord$y_order),
+    annot_group = factor(annot_group, levels = ord$x_order)
+  ) %>%
+  ggplot(mapping = aes(x = KNN_celltype_v2, y = annot_group, fill = z_score)) +
+  geom_tile(color = "grey50") +
+  geom_text(
+    data = . %>% filter(sig == "*", Estimate < 0),
+    mapping = aes(label = sig),
+    size = 2, color = "blue"
+  ) +
+  geom_text(
+    data = . %>% filter(sig == "*", Estimate > 0),
+    mapping = aes(label = sig),
+    size = 2, color = "red"
+  ) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(
+    labels = rev(c(
+      "TB distant", "TB peritumor", "TB intratumor",
+      "Interface hub", "Stromal hub"
+    )),
+    expand = c(0, 0)
+  ) +
+  scale_rdbu_fill(limits = c(-2, 0, 2)) +
+  labs(
+    x = NULL,
+    y = NULL,
+    fill = "Z-score"
+  ) +
+  vertical_x_text() +
+  theme(legend.position = "left")
+
+ggdf_counts <-
+  bind_rows(
+    annots %>%
+      filter(
+        cxcl_pos_tile == "CXCL_pos",
+        cxcl_niche_comp != "",
+        KNN_Mid %in% c("Tcd4", "Tcd8", "Tplzf")
+      ) %>%
+      group_by(cxcl_niche_comp, KNN_Grouped) %>%
+      summarize(count = n(), .groups = "drop") %>%
+      rename(annot_group = cxcl_niche_comp),
+    annots %>%
+      filter(
+        TB_pathology_region %in% c("TB_other", "TB_peritumor", "TB_intratumor")
+      ) %>%
+      # Merge tumor path_regions together
+      mutate(
+        path_reg = case_when(
+          grepl("tumor_", TB_pathology_region) ~ "tumor",
+          TRUE ~ TB_pathology_region
+        ),
+        KNN_Mid %in% c("Tcd4", "Tcd8", "Tplzf")
+      ) %>%
+      group_by(path_reg, KNN_Grouped) %>%
+      summarize(count = n(), .groups = "drop") %>%
+      rename(annot_group = path_reg)
+  ) %>%
+  filter(annot_group %out% c("epithelial_only")) %>%
+  mutate(annot_group = factor(annot_group, levels = ord$x_order))
+
+plot_count_barplot <- function(ggdf_counts) {
+  plt <- ggdf_counts %>%
+    ggplot(mapping = aes(x = count, y = annot_group, fill = KNN_Grouped2)) +
+    geom_bar(stat = "identity", fill = "black", show.legend = FALSE) +
+    scale_x_continuous(
+      expand = c(0, 0),
+      labels = label_scientific(),
+      transform = "log10"
+    ) +
+    scale_y_discrete(expand = c(0, 0)) +
+    labs(x = "Count") +
+    vertical_x_text() +
+    strip_y_axis() +
+    theme(
+      panel.grid.major = element_blank(),
+      plot.margin = margin(l = -2, r = 4)
+    )
+
+  return(plt)
+}
+
+plt2 <- plot_count_barplot(ggdf_counts %>% filter(KNN_Grouped == "Immune"))
+
+plt <- plt1 + plt2 +
+  plot_layout(widths = c(1, 0.1))
+
+plt
+```

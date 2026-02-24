@@ -1,0 +1,290 @@
+---
+title: "Figure 5 - T cell interactions and phenotypes in CXCR3L+ hubs"
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+source(here::here("src/rload.R"))
+```
+
+```{r}
+#| label: helper-functions
+#| echo: true
+#| results: hide
+plot_deg_volcano <- function(ggdf_deg, add_genes_to_label, genes_to_plot) {
+  plt <- ggdf_deg %>%
+    mutate(
+      fill_col = case_when(
+        padj <= 0.05 & Pass_NeighborCell_Filter == TRUE ~ "sig",
+        padj <= 0.05 & Pass_NeighborCell_Filter == FALSE ~ "sig_false",
+        padj > 0.05 ~ "ns",
+        TRUE ~ "ns"
+      )
+    ) %>%
+    ggplot(mapping = aes(x = log2FoldChange, y = -log10(padj))) +
+    geom_hline(
+      yintercept = -log10(0.05),
+      linewidth = 0.5, linetype = "dashed", color = "black",
+    ) +
+    geom_vline(
+      xintercept = 0,
+      linewidth = 0.5, linetype = "dashed", color = "black",
+    ) +
+    ggrepel::geom_text_repel(
+      . %>% filter(Gene_ID %in% add_genes_to_label),
+      mapping = aes(label = Gene_ID),
+      size = 2,
+      max.overlaps = Inf
+    ) +
+    geom_point(
+      mapping = aes(fill = fill_col),
+      shape = 21,
+      size = 1.25, stroke = 0.25
+    ) +
+    scale_fill_manual(
+      values = c(
+        "sig" = "firebrick",
+        "sig_false" = "white",
+        "ns" = "black"
+      )
+    ) +
+    labs(
+      x = "logFC",
+      y = "-log10(adj)"
+    ) +
+    theme(legend.position = "none")
+
+  return(plt)
+}
+
+plot_pseudobulk_boxplot <- function(ggdf_gex, res_DEG, genes_to_plot) {
+  ggdf <- ggdf_gex %>%
+    pivot_longer(
+      cols = -c("Patient_ID", "MMRstatus", "Anchor_Group_Location"),
+      names_to = "Gene_ID",
+      values_to = "value"
+    ) %>%
+    filter(Gene_ID %in% genes_to_plot) %>%
+    mutate(
+      group = case_when(
+        grepl("_Epi", Anchor_Group_Location) ~ "Epi",
+        grepl("_Stroma", Anchor_Group_Location) ~ "Stroma",
+        TRUE ~ "Other"
+      ),
+      group = factor(
+        group,
+        levels = c("Stroma", "Epi")
+      ),
+      Gene_ID = factor(
+        Gene_ID,
+        levels = genes_to_plot
+      )
+    )
+
+  max_gex <- ggdf %>%
+    group_by(Gene_ID) %>%
+    summarize(max_gex = max(value, na.rm = TRUE), .groups = "drop")
+
+  ggdf_stat <- ggdf_deg %>%
+    filter(
+      Gene_ID %in% genes_to_plot
+    ) %>%
+    mutate(
+      group1 = "Stroma",
+      group2 = "Epi"
+    ) %>%
+    left_join(
+      max_gex,
+      by = "Gene_ID"
+    ) %>%
+    mutate(
+      y.position = case_when(
+        (group1 == "Stroma") & (group2 == "Epi") ~ max_gex * 1.1,
+        TRUE ~ max_gex * 1.05
+      ),
+      padj_format = format(signif(padj, 2), scientific = TRUE),
+      Gene_ID = factor(Gene_ID, levels = genes_to_plot)
+    ) %>%
+    filter(!is.na(y.position))
+
+  plt <- ggplot() +
+    geom_boxplot(
+      ggdf,
+      mapping = aes(x = group, y = value),
+      outlier.shape = NA,
+      lwd = 0.5, median.linewidth = 0.5
+    ) +
+    geom_line(
+      ggdf,
+      mapping = aes(x = group, y = value, group = Patient_ID, color = MMRstatus),
+      linewidth = 0.5, alpha = 0.5
+    ) +
+    geom_point(
+      ggdf,
+      mapping = aes(x = group, y = value, fill = MMRstatus),
+      shape = 21,
+      size = 1.25, stroke = 0.15
+    ) +
+    stat_pvalue_manual(
+      ggdf_stat,
+      label = "padj_format",
+      tip.length = 0.01,
+      size = 2
+    ) +
+    facet_wrap(
+      ~Gene_ID,
+      scales = "free_y", ncol = 6,
+      labeller = labeller(Gene_ID = function(value) {
+        wrapped_labels <- label_wrap_gen(width = 13)(gsub("-", " ", value))
+        return(wrapped_labels)
+      })
+    ) +
+    scale_x_discrete(labels = c("Stroma", "Epi")) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+    scale_color_manual(values = cmap_MMR) +
+    scale_fill_manual(values = cmap_MMR) +
+    coord_cartesian(ylim = c(0, NA)) +
+    labs(
+      x = NULL,
+      y = "GEX"
+    ) +
+    vertical_x_text() +
+    theme(legend.position = "none")
+
+  return(plt)
+}
+```
+
+## Figure 5B
+```{r}
+#| label: fig-5b
+#| fig-width: 6
+#| fig-height: 4
+
+# Made in Adobe Illustrator
+knitr::include_graphics("../figures_ai/Fig5B.png")
+```
+
+## Figure 5C
+Data by Jingya
+```{r}
+#| label: fig-5c
+#| fig-width: 6
+#| fig-height: 3
+
+ggdf <- fread(here(
+  here(
+    "data/other",
+    "Fig5C-CD8-CXCL13-Neighbors-DistanceBins.csv"
+  )
+))
+
+cmap_custom <- c(
+  "Epi" = "#AE00FF",
+  "Endo" = "#09CECA",
+  "Fibro" = "#256362",
+  "Peri" = "#298C87",
+  "Myeloid" = "#FFAF24",
+  "Tcd8" = "#FF0000",
+  "Tcd4" = "#991D21",
+  "B" = "#0011FF",
+  "Plasma" = "#66B5FF",
+  "Other" = "#D9D9D8"
+)
+
+plt <- ggdf %>%
+  mutate(
+    Cell_Type = factor(Cell_Type, levels = names(cmap_custom)),
+    Group = factor(Group, levels = c(
+      "Stroma[-40,-20)",
+      "Stroma[-20,0)",
+      "Epi[0,20)",
+      "Epi[20,40)"
+    ))
+  ) %>%
+  ggplot(mapping = aes(x = Group, y = Freq, fill = Cell_Type)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = cmap_custom) +
+  labs(
+    x = NULL,
+    y = "Frequency",
+    fill = "Cell Type"
+  )
+
+plt
+```
+
+## Figure 5D
+```{r}
+#| label: fig-5d
+#| fig-width: 4
+#| fig-height: 6
+
+# Made in Adobe Illustrator
+knitr::include_graphics("../figures_ai/Fig5D.png")
+```
+
+## Figure 5E
+Data by Jingya
+```{r}
+#| label: fig-5e
+#| fig-width: 2.5
+#| fig-height: 4.5
+
+ggdf_deg <- readxl::read_excel(
+  here(
+    "data/supplemental_tables",
+    "Supp Table 6 - CD8 CXCL13 comb interface DEG Fig 5E.xlsx"
+  ),
+  sheet = "Table S6A - DEG"
+) %>%
+  mutate(padj = as.double(padj))
+add_genes_to_label <- ggdf_deg %>%
+  filter(padj <= 0.05 & Pass_NeighborCell_Filter == TRUE) %>%
+  pull(Gene_ID)
+
+ggdf_gex <- readxl::read_excel(
+  here(
+    "data/supplemental_tables",
+    "Supp Table 6 - CD8 CXCL13 comb interface DEG Fig 5E.xlsx"
+  ),
+  sheet = "Table S6B - VST"
+)
+genes_to_plot <- c("ITGAE", "ANXA1", "GZMK", "CCR7")
+
+plt1 <- plot_deg_volcano(ggdf_deg, add_genes_to_label)
+plt2 <- plot_pseudobulk_boxplot(ggdf_gex, ggdf_deg, genes_to_plot)
+
+plt <- plt1 + plt2 +
+  plot_layout(heights = c(1, 0.65))
+
+plt
+```
+
+

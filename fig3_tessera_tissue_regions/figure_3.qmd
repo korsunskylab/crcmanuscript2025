@@ -1,0 +1,149 @@
+---
+title: "Figure 3 - CXCR3L+ hubs contain activated T cells, are enriched in MMRd, and localize to the stromal/epithelial interface."
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+# Load packages and data
+source(here::here("src/rload.R"))
+```
+
+## Figure 3A
+
+```{r}
+#| label: fig-3a
+#| fig-width: 18
+#| fig-height: 9
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  filter(sample_name == "G4423") %>%
+  rotate_xy(., angle_deg = 142)
+
+# Coloring by tessera tile annotation
+plt <- ggdf %>%
+  ggplot(mapping = aes(x = x_rotated, y = y_rotated, fill = cxcl_pos_tile)) +
+  geom_point_rast(size = 0.35, shape = 21, stroke = NA) +
+  scale_fill_manual(values = cmap_CXCL) +
+  theme_void() +
+  theme(legend.position = "none")
+
+plt <- add_scale_bar(plt, scale_len = 1000, scale_width = 1.5, text_size = 0)
+
+plt
+```
+
+## Figure 3B
+
+```{r}
+#| label: fig-3b
+#| fig-width: 7
+#| fig-height: 2.5
+#| fig-dpi: 300
+
+glmm_res <- fread(here(
+  outdir,
+  "GLMM_tables",
+  "GLMM_cxcl_region_tumor_CXCL_pos_tile_vs_CXCL_neg_tile.csv"
+))
+
+plt <- plot_glmm_barplot(glmm_res)
+
+plt
+```
+
+## Figure 3C
+```{r}
+#| label: fig-3c
+#| fig-width: 2.5
+#| fig-height: 2.5
+#| fig-dpi: 300
+
+# Made with python `sample_viz.py`
+knitr::include_graphics("../outputs/sample_viz/Fig3C_G4423_cxcl_G4423_i93_tessera_annotation.png")
+knitr::include_graphics("../outputs/sample_viz/Fig3C_G4423_cxcl_G4423_i93_KNN_Top.png")
+knitr::include_graphics("../outputs/sample_viz/Fig3C_G4423_cxcl_G4423_i197_tessera_annotation.png")
+knitr::include_graphics("../outputs/sample_viz/Fig3C_G4423_cxcl_G4423_i197_KNN_Top.png")
+knitr::include_graphics("../outputs/sample_viz/Fig3C_G4423_cxcl_G4423_i88_tessera_annotation.png")
+knitr::include_graphics("../outputs/sample_viz/Fig3C_G4423_cxcl_G4423_i88_KNN_Top.png")
+```
+
+## Figure 3D
+
+```{r}
+#| label: fig-3d
+#| fig-width: 2.5
+#| fig-height: 2.5
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  filter(grepl("tumor", pathology_region), ) %>%
+  group_by(PatientID, MMRstatus, cxcl_niche_comp, cxcl_pos_tile) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  group_by(PatientID, MMRstatus) %>%
+  mutate(
+    total_n = sum(n),
+    freq = n / total_n
+  ) %>%
+  filter(
+    cxcl_niche_comp %in% c("epithelial_only", "stromal_only", "mixed"),
+    cxcl_pos_tile == "CXCL_pos"
+  )
+
+plt <- ggdf %>%
+  ggplot(mapping = aes(x = cxcl_niche_comp, y = freq, fill = MMRstatus)) +
+  geom_boxplot(
+    outlier.shape = NA,
+    lwd = 0.5, median.linewidth = 0.5
+  ) +
+  geom_point(
+    position = position_jitterdodge(jitter.width = 0.15),
+    shape = 21,
+    size = 1.75
+  ) +
+  ggpubr::stat_compare_means(
+    mapping = aes(label = after_stat(p.signif)),
+    method = "wilcox.test",
+    hide.ns = TRUE,
+    vjust = 0.5
+  ) +
+  scale_x_discrete(
+    labels = c(
+      "Epithelial\nhub",
+      "Interface\nhub",
+      "Stromal\nhub"
+    )
+  ) +
+  scale_fill_manual(values = cmap_MMR) +
+  labs(
+    x = NULL,
+    y = "Cell Freq"
+  ) +
+  theme(legend.position = "none")
+
+plt
+```

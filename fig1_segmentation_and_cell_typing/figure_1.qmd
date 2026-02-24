@@ -1,0 +1,659 @@
+---
+title: "Figure 1 - Cohort overview and spatial atlas of cell types and immune hubs in human CRC"
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+source(here::here("src/rload.R"))
+```
+
+## Figure 1A
+```{r}
+#| label: fig-1a
+#| fig-width: 6
+#| fig-height: 4
+
+# Made in Adobe Illustrator
+```
+
+## Figure 1B
+```{r}
+#| label: fig-1b
+#| fig-width: 6
+#| fig-height: 4
+
+# Made in Adobe Illustrator
+```
+
+## Figure 1C
+```{r}
+#| label: fig-1c
+#| fig-width: 4.5
+#| fig-height: 1.5
+#| fig-dpi: 300
+
+# CRC atlas celltype counts obtained from
+# GSE178341/GSE178341_crc10x_full_c295v4_submit_cluster.csv
+# Data was grouped by clTopLevel, summarized by n
+ggdf <- fread(
+  here(
+    "data/other",
+    "CRC_atlas_clTopLevel_counts.csv"
+  )
+) %>%
+  left_join(
+    annots %>%
+      group_by(KNN_Top) %>%
+      summarize(merfish = n(), .groups = "drop"),
+    by = c("clTopLevel" = "KNN_Top")
+  ) %>%
+  pivot_longer(
+    cols = -clTopLevel,
+    names_to = "data_source",
+    values_to = "n"
+  ) %>%
+  mutate(
+    data_source = factor(data_source, levels = c("scrnaseq", "merfish")),
+    clTopLevel = factor(clTopLevel, levels = knn_top_ord)
+  )
+
+# Barplot of cell type frequencies in MERFISH and scRNA-seq dataset
+plt <- ggdf %>%
+  ggplot(mapping = aes(x = n, y = data_source, fill = clTopLevel)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(
+    expand = c(0, 0),
+    labels = c("scRNA\nAtlas", "MERFISH")
+  ) +
+  scale_fill_manual(values = cmap_top) +
+  labs(
+    x = "Proportion",
+    fill = NULL
+  ) +
+  theme(axis.title.y = element_blank())
+
+plt
+```
+
+## Figure 1D
+```{r}
+#| label: fig-1d
+#| fig-width: 12
+#| fig-height: 15
+#| fig-dpi: 300
+
+# Using G4669_reg1 as our example sample
+ggdf <- annots %>%
+  filter(sample_name == "G4669_reg1")
+
+# Colored by pathology region
+plt1 <- ggdf %>%
+  ggplot(mapping = aes(x = x, y = y, fill = pathology_region)) +
+  geom_point_rast(size = 0.2, shape = 21, stroke = NA) +
+  scale_fill_manual(values = cmap_path_annot) +
+  theme_void() +
+  theme(legend.position = "none")
+plt1 <- add_scale_bar(plt1, scale_len = 1000, scale_width = 1.5, text_size = 0)
+
+# Colored by KNN Top
+plt2 <- ggdf %>%
+  ggplot(mapping = aes(x = x, y = y, fill = KNN_Top)) +
+  geom_point_rast(size = 0.2, shape = 21, stroke = NA) +
+  scale_fill_manual(values = cmap_top) +
+  theme_void() +
+  theme(legend.position = "none")
+plt2 <- add_scale_bar(plt2, scale_len = 1000, scale_width = 1.5, text_size = 0)
+
+plt <- plt1 + plt2 +
+  plot_layout(ncol = 2)
+
+plt
+```
+
+## Figure 1E
+```{r}
+#| label: fig-1e
+#| fig-width: 4.5
+#| fig-height: 2.5
+#| fig-dpi: 300
+
+# Bar plot of cell counts per patient
+plt1 <- annots %>%
+  group_by(PatientID, MMRstatus) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  mutate(PatientID = factor(PatientID, levels = patient_ord)) %>%
+  ggplot(mapping = aes(x = PatientID, y = count, fill = MMRstatus)) +
+  geom_bar(stat = "identity") +
+  scale_y_continuous(labels = label_scientific()) +
+  scale_fill_manual(values = cmap_MMR) +
+  labs(
+    x = NULL,
+    y = "Cell count",
+    fill = "MMR status"
+  ) +
+  strip_x_axis()
+
+# Filled barplot of pathology region composition in patient samples
+plt2 <- annots %>%
+  group_by(pathology_region, PatientID, MMRstatus) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  mutate(
+    PatientID = factor(PatientID, levels = patient_ord),
+    pathology_region = factor(pathology_region, levels = rev(path_ord))
+  ) %>%
+  ggplot(mapping = aes(x = PatientID, y = count, fill = pathology_region)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = cmap_path_annot) +
+  labs(
+    x = "PatientID",
+    y = "Proportion",
+    fill = "Pathology region"
+  ) +
+  vertical_x_text() +
+  guides(fill = guide_legend(reverse = TRUE))
+
+plt <- plt1 + plt2 +
+  plot_layout(heights = c(0.3, 1))
+
+plt
+```
+
+## Figure 1F
+```{r}
+#| label: fig-1f
+#| fig-width: 2.8
+#| fig-height: 2.2
+#| fig-dpi: 300
+
+plt <- annots %>%
+  group_by(KNN_Top, pathology_region) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  mutate(
+    KNN_Top = factor(KNN_Top, levels = rev(knn_top_ord)),
+    pathology_region = factor(pathology_region, levels = path_ord)
+  ) %>%
+  ggplot(mapping = aes(x = pathology_region, y = count, fill = KNN_Top)) +
+  geom_bar(
+    stat = "identity",
+    position = "fill"
+  ) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = cmap_top) +
+  labs(
+    x = NULL,
+    y = "KNN Proportion",
+    fill = NULL
+  ) +
+  vertical_x_text() +
+  scale_x_discrete(
+    labels = c(
+      "Tumor", "Tumor IB", "Tumor LS", "Non-neo.\nmuc.",
+      "Non-neo.\nother", "Lymphoid\nstructure"
+    )
+  )
+
+plt
+```
+
+## Figure 1G
+```{r}
+#| label: fig-1g
+#| fig-width: 8
+#| fig-height: 2
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  mutate(
+    pathology_region = case_when(
+      grepl("tumor", pathology_region) ~ "tumor",
+      TRUE ~ pathology_region
+    )
+  ) %>%
+  group_by(
+    PatientID, MMRstatus, pathology_region,
+    KNN_Grouped, KNN_celltype_v2
+  ) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  group_by(PatientID, MMRstatus, pathology_region, KNN_Grouped) %>%
+  mutate(
+    total_n = sum(n),
+    freq = n / total_n
+  ) %>%
+  ungroup() %>%
+  group_by(pathology_region, KNN_Grouped, KNN_celltype_v2) %>%
+  summarize(median_freq = median(freq), .groups = "drop") %>%
+  group_by(KNN_celltype_v2) %>%
+  mutate(z_score = scale(median_freq)[, 1]) %>%
+  filter(KNN_Grouped %in% c("Endothelial", "Epithelial", "Fibroblast", "Immune"))
+
+# Cluster heatmap and apply ordering
+ord <- get_heatmap_hclust(
+  df_input = ggdf,
+  x_col = "KNN_celltype_v2",
+  y_col = "pathology_region",
+  fill_col = "z_score",
+  na_fill = 0
+)
+
+ggdf <- ggdf %>%
+  mutate(
+    KNN_celltype_v2 = factor(
+      KNN_celltype_v2,
+      levels = ord$x_ord
+    ),
+    pathology_region = factor(
+      pathology_region,
+      levels = rev(c(
+        "tumor",
+        "non_neoplastic_mucosa",
+        "non_neoplastic_other",
+        "lymphoid_structure"
+      ))
+    )
+  )
+
+# Load the GLMM results
+ggdf_stat <- fread(
+  here(
+    outdir,
+    "GLMM_tables",
+    "GLMM_pathology_region_tumor_vs_non_neoplastic_mucosa.csv"
+  )
+) %>%
+  filter(!grepl("intercept", rowname)) %>%
+  mutate(
+    enrich_group = case_when(
+      Estimate > 0 ~ "tumor",
+      Estimate < 0 ~ "non_neoplastic_mucosa",
+      TRUE ~ "none"
+    ),
+    sig = case_when(
+      padj < 0.05 ~ enrich_group,
+      TRUE ~ NA_character_
+    ),
+    color_group = case_when(
+      sig == "tumor" ~ "#1c75bc",
+      sig == "non_neoplastic_mucosa" ~ "#bc740c",
+      TRUE ~ "black"
+    )
+  ) %>%
+  arrange(match(rowname, ord$x_order)) %>%
+  left_join(
+    knn_top_map,
+    by = c("rowname" = "KNN_celltype_v2")
+  )
+
+# Plot celltype heatmap
+plot_celltype_heatmap <- function(group, strip_y_axis = FALSE) {
+  p <- ggdf %>%
+    filter(KNN_Grouped == group) %>%
+    ggplot(mapping = aes(x = KNN_celltype_v2, y = pathology_region, fill = z_score)) +
+    geom_tile(color = "black") +
+    geom_point(
+      mapping = aes(size = median_freq),
+      shape = 1,
+      stroke = 0.5, color = "black",
+    ) +
+    scale_x_discrete(expand = c(0, 0)) +
+    scale_y_discrete(
+      expand = c(0, 0),
+      labels = rev(c(
+        "Tumor", "Non-neo. muc.", "Non-neo. other", "Lym. structure"
+      ))
+    ) +
+    scale_rdbu_fill(c(-2, 0, 2)) +
+    scale_size_continuous(range = c(0.5, 2)) +
+    vertical_x_text() +
+    theme(
+      legend.position = "none",
+      axis.title.y = element_blank(),
+      axis.title.x = element_blank(),
+      axis.text.x = element_text(
+        color = ggdf_stat %>%
+          filter(KNN_Grouped == group) %>%
+          select(rowname, color_group) %>%
+          pull(color_group)
+      )
+    ) +
+    ggtitle(group)
+
+  if (strip_y_axis) {
+    p <- p + strip_y_axis()
+  }
+
+  return(p)
+}
+
+plt1 <- plot_celltype_heatmap("Immune")
+plt2 <- plot_celltype_heatmap("Fibroblast", strip_y_axis = TRUE)
+plt3 <- plot_celltype_heatmap("Endothelial", strip_y_axis = TRUE)
+
+plt <- plt1 + plt2 + plt3 +
+  plot_layout(widths = c(1.15, 0.2, 0.2))
+plt
+```
+
+## Figure 1H
+```{r}
+#| label: fig-1h
+#| fig-width: 18
+#| fig-height: 9
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  filter(sample_name == "G4423") %>%
+  rotate_xy(., angle_deg = 142)
+
+# Coloring by tessera tile annotation
+plt1 <- ggdf %>%
+  filter(y_rotated >= 200) %>%
+  ggplot(mapping = aes(x = x_rotated, y = y_rotated, fill = tessera_annotation)) +
+  geom_point_rast(size = 0.35, shape = 21, stroke = NA) +
+  scale_fill_manual(values = cmap_tessera_annot) +
+  theme_void() +
+  theme(legend.position = "none")
+plt1 <- add_scale_bar(plt1, scale_len = 1000, scale_width = 3, text_size = 0)
+
+# Coloring by stromal band annotation
+plt2 <- ggdf %>%
+  filter(y_rotated >= 200) %>%
+  arrange(fibro_interface_type) %>%
+  ggplot(mapping = aes(x = x_rotated, y = y_rotated, fill = fibro_interface_type)) +
+  geom_point_rast(size = 0.35, shape = 21, stroke = NA) +
+  scale_fill_manual(values = cmap_band) +
+  theme_void() +
+  theme(legend.position = "none")
+plt2 <- add_scale_bar(plt2, scale_len = 1000, scale_width = 3, text_size = 0)
+
+plt <- plt1 + plt2 +
+  plot_layout(ncol = 2)
+
+plt
+```
+
+```{r}
+# Made with python `sample_viz.py`
+```
+
+## Figure 1I
+```{r}
+#| label: fig-1i
+#| fig-width: 6
+#| fig-height: 2.85
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  filter(
+    grepl("tumor", pathology_region),
+    KNN_Grouped %in% c("Immune", "Endothelial", "Fibroblast")
+  ) %>%
+  group_by(
+    PatientID, MMRstatus,
+    KNN_Grouped, KNN_celltype_v2, KNN_Top,
+    tessera_annotation
+  ) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  group_by(PatientID, KNN_Grouped, KNN_celltype_v2) %>%
+  mutate(
+    total_n = sum(n),
+    freq = n / total_n
+  ) %>%
+  ungroup() %>%
+  filter(
+    total_n >= 50,
+    tessera_annotation == "stromal_tile"
+  ) %>%
+  arrange(desc(freq))
+
+# Arrange by median frequency
+ord <- ggdf %>%
+  group_by(KNN_celltype_v2) %>%
+  summarize(med_freq = median(freq), .groups = "drop") %>%
+  arrange(med_freq) %>%
+  pull(KNN_celltype_v2)
+
+plt <- ggdf %>%
+  mutate(
+    KNN_celltype_v2 = factor(KNN_celltype_v2, levels = ord),
+    KNN_Grouped = factor(
+      KNN_Grouped,
+      levels = c("Immune", "Endothelial", "Fibroblast")
+    )
+  ) %>%
+  ggplot(mapping = aes(x = KNN_celltype_v2, y = freq, fill = KNN_Top)) +
+  geom_boxplot(
+    outlier.shape = NA,
+    lwd = 0.5,
+    median.linewidth = 0.5
+  ) +
+  geom_point(
+    position = position_jitter(width = 0.15),
+    size = 1, stroke = NA, alpha = 1
+  ) +
+  facet_grid(
+    ~KNN_Grouped,
+    scales = "free", space = "free"
+  ) +
+  scale_fill_manual(values = cmap_top) +
+  labs(
+    x = NULL,
+    y = "Frequency in stromal tile",
+    fill = NULL
+  ) +
+  vertical_x_text() +
+  theme(
+    legend.position = "none",
+    panel.spacing = unit(0.05, "lines")
+  )
+
+plt
+```
+
+## Figure 1J 
+```{r}
+#| label: fig-1j
+#| fig-width: 3.5
+#| fig-height: 3.5
+#| fig-dpi: 300
+
+# Calculate the odds ratio between the epithelial and stromal tessera tiles
+summary_or_tessera <- full_join(
+  annots %>%
+    filter(
+      grepl("tumor", pathology_region),
+      tessera_annotation %in% c("epithelial_tile", "stromal_tile")
+    ) %>%
+    count(
+      PatientID, KNN_celltype_v2, tessera_annotation,
+      name = "cell_n"
+    ),
+  annots %>%
+    filter(grepl("tumor", pathology_region)) %>%
+    count(
+      PatientID, tessera_annotation,
+      name = "total_n"
+    ),
+  by = c("PatientID", "tessera_annotation")
+) %>%
+  group_by(PatientID, KNN_celltype_v2) %>%
+  reframe(
+    epithelial = cell_n[tessera_annotation == "epithelial_tile"],
+    stromal = cell_n[tessera_annotation == "stromal_tile"],
+    total_epithelial = total_n[tessera_annotation == "epithelial_tile"],
+    total_stromal = total_n[tessera_annotation == "stromal_tile"],
+    .groups = "drop"
+  ) %>%
+  mutate(across(c(epithelial, stromal, total_epithelial, total_stromal), as.numeric)) %>%
+  mutate(
+    odds_ratio_stroma_epith = (stromal * (total_epithelial - epithelial)) /
+      (epithelial * (total_stromal - stromal))
+  ) %>%
+  group_by(KNN_celltype_v2) %>%
+  summarize(
+    logOR_mean = mean(log(odds_ratio_stroma_epith), na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(logOR_mean))
+
+# Calculate the odds ratio between the thin and thick stromal bands
+summary_or_interface <- full_join(
+  annots %>%
+    filter(tessera_annotation == "stromal_tile") %>%
+    count(
+      PatientID, KNN_celltype_v2, fibro_interface_type,
+      name = "cell_n"
+    ),
+  annots %>%
+    filter(tessera_annotation == "stromal_tile") %>%
+    count(
+      PatientID, fibro_interface_type,
+      name = "total_n"
+    ),
+  by = c("PatientID", "fibro_interface_type")
+) %>%
+  group_by(PatientID, KNN_celltype_v2) %>%
+  reframe(
+    thin = sum(cell_n[fibro_interface_type == "thin"], na.rm = TRUE),
+    thick = sum(cell_n[fibro_interface_type == "thick"], na.rm = TRUE),
+    total_thin = sum(total_n[fibro_interface_type == "thin"], na.rm = TRUE),
+    total_thick = sum(total_n[fibro_interface_type == "thick"], na.rm = TRUE)
+  ) %>%
+  mutate(across(c(thin, thick, total_thin, total_thick), as.numeric)) %>%
+  mutate(
+    odds_ratio_thick_thin = (thick * (total_thin - thin)) /
+      (thin * (total_thick - thick))
+  ) %>%
+  group_by(KNN_celltype_v2) %>%
+  summarize(
+    logOR_mean = mean(log(odds_ratio_thick_thin), na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(logOR_mean))
+
+# Load the GLMM results for the fibro interface type and tessera tile annotations
+glmm_res_fibro <- fread(here(
+  outdir,
+  "GLMM_tables",
+  "GLMM_fibro_interface_type_thin_vs_thick.csv"
+)) %>%
+  filter(!grepl("intercept", rowname)) %>%
+  rename(padj_fibro = padj)
+
+glmm_res_tessera <- fread(here(
+  outdir,
+  "GLMM_tables",
+  "GLMM_tessera_annotation_stromal_vs_epithelial.csv"
+)) %>%
+  filter(!grepl("intercept", rowname)) %>%
+  rename(padj_tessera = padj)
+
+# Join the summary ORs for the tessera tile and fibro interface type annotations
+ggdf <- full_join(
+  summary_or_tessera %>%
+    select(KNN_celltype_v2, logOR_mean) %>%
+    rename(logOR_mean_tessera = logOR_mean),
+  summary_or_interface %>%
+    select(KNN_celltype_v2, logOR_mean) %>%
+    rename(logOR_mean_interface = logOR_mean),
+  by = "KNN_celltype_v2"
+) %>%
+  left_join(
+    knn_top_map,
+    by = c("KNN_celltype_v2" = "KNN_celltype_v2")
+  ) %>%
+  left_join(
+    glmm_res_fibro %>%
+      select(rowname, padj_fibro),
+    by = c("KNN_celltype_v2" = "rowname")
+  ) %>%
+  left_join(
+    glmm_res_tessera %>%
+      select(rowname, padj_tessera),
+    by = c("KNN_celltype_v2" = "rowname")
+  ) %>%
+  mutate(
+    sig_annot = case_when(
+      padj_fibro < 0.05 & padj_tessera < 0.05 ~ "both",
+      padj_fibro < 0.05 & padj_tessera >= 0.05 ~ "fibro",
+      padj_fibro >= 0.05 & padj_tessera < 0.05 ~ "tessera",
+      TRUE ~ "none"
+    )
+  )
+
+# Plot the scatterplot of the odds ratios
+plt <- ggdf %>%
+  mutate(
+    KNN_Grouped = factor(KNN_Grouped, levels = rev(knn_group_ord)),
+    sig_annot = ifelse(KNN_Grouped == "Immune", sig_annot, NA)
+  ) %>%
+  arrange(KNN_Grouped) %>%
+  ggplot(mapping = aes(x = logOR_mean_tessera, y = logOR_mean_interface, fill = KNN_Top, color = sig_annot)) +
+  geom_hline(
+    yintercept = 0,
+    linetype = "dashed", linewidth = 0.25, color = "red"
+  ) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed", linewidth = 0.25, color = "red"
+  ) +
+  geom_point(
+    shape = 21, stroke = 0.25, size = 2
+  ) +
+  ggrepel::geom_text_repel(
+    data = . %>% filter(
+      KNN_Grouped == "Immune", sig_annot == "both"
+    ),
+    mapping = aes(
+      x = logOR_mean_tessera,
+      y = logOR_mean_interface,
+      label = KNN_celltype_v2,
+      color = sig_annot
+    ),
+    size = 1.25,
+    max.overlaps = Inf,
+    box.padding = 0.2,
+    point.padding = 0.3,
+    segment.size = 0.2,
+    min.segment.length = 0,
+    force = 1
+  ) +
+  scale_color_manual(values = c(
+    "both" = "red",
+    "tessera" = "black"
+  )) +
+  scale_fill_manual(values = cmap_top) +
+  labs(
+    x = "<- Epithelial : Stroma ->",
+    y = "<- Thin : Thick ->",
+    fill = NULL
+  ) +
+  theme(legend.position = "none")
+
+plt
+```

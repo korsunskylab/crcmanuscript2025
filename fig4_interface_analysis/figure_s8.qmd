@@ -1,0 +1,174 @@
+---
+title: "Figure S8 - T cell interactions and phenotypes in CXCR3L+ hubs"
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+# Load packages and data
+source(here::here("src/rload.R"))
+```
+
+## Figure S8B
+```{r}
+#| label: fig-s8b
+#| fig-width: 3
+#| fig-height: 4
+
+
+# Read in Tcd8-CXCL13-comb cells and their CCR7 expression
+ggdf <- fread(here("data", "other", "FigS8B-Tcd8-CXCL13-comb_CCR7_dist_bin.csv")) %>% 
+  mutate(
+    CCR7p = case_when(
+      CCR7 >= 1 ~ "CCR7_pos", 
+      TRUE ~ "CCR7_neg"),
+    group = case_when(
+      dist_bin %in% c("[-40, -20)", "[-20, 0)") ~ "[-40,0]",
+      TRUE ~ "[0,40]"
+    )
+  ) %>% 
+  group_by(PatientID, MMRstatus, CCR7p, group) %>% 
+  summarize(n = n(), .groups = "drop") %>% 
+  pivot_wider(
+    names_from = "CCR7p",
+    values_from = "n",
+    values_fill = 0
+  ) %>%
+  mutate(
+    prop = CCR7_pos / CCR7_neg,
+    group = factor(group, levels = c("[-40,0]", "[0,40]"))
+  )
+
+# Calculate wilcoxon test, paired
+ggdf_stats <- ggdf %>% 
+  select(PatientID, MMRstatus, group, prop) %>% 
+  pivot_wider(
+    names_from = "group",
+    values_from = "prop",
+    values_fill = 0)
+pval <- wilcox.test(ggdf_stats$`[-40,0]`, ggdf_stats$`[0,40]`, paired = TRUE)
+pval_df <- data.frame(
+  group1 = "[-40,0]",
+  group2 = "[0,40]",
+  p = pval$p.value,
+  y.position = max(ggdf$prop, na.rm = TRUE) * 1.05
+) %>% 
+  mutate(label = sprintf("p = %.3g", p))
+
+ggplot() +
+  geom_boxplot(
+    ggdf,
+    mapping = aes(x = group, y = prop),
+    outlier.shape = NA,
+    lwd = 0.5, median.linewidth = 0.5
+  ) +
+  geom_line(
+    ggdf,
+    mapping = aes(x = group, y = prop, group = PatientID, color = MMRstatus),
+    linewidth = 0.5, alpha = 0.5
+  ) +
+  geom_point(
+    ggdf,
+    mapping = aes(x = group, y = prop, fill = MMRstatus),
+    shape = 21,
+    size = 1.25, stroke = 0.15
+  ) +
+  stat_pvalue_manual(
+    pval_df,
+    label = "label",
+    tip.length = 0.01,
+    bracket.size = 0.4,
+    textsize = 2
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  scale_color_manual(values = cmap_MMR) +
+  scale_fill_manual(values = cmap_MMR) +
+  coord_cartesian(ylim = c(0, NA)) +
+  labs(y = "Prop CCR7+")
+
+
+```
+
+## Figure S8C
+Data by Jingya Qiu
+```{r}
+#| label: fig-s8c
+#| fig-width: 3
+#| fig-height: 4
+
+ggdf <- readxl::read_excel(
+  here(
+    "data/supplemental_tables",
+    "Supp Table 7 - CD8 CXCL13 comb ITGAE corr Fig 5F.xlsx"
+  ),
+  sheet = "Table S7"
+) %>%
+  mutate(
+    Correlation = as.double(Correlation),
+    pval = as.double(pval)
+  )
+
+genes_to_label <- c(
+  "ITGAE", "LDLRAD4", "CD3G", "CD2", "TRAV6",
+  "TRBVB", "TRGV9", "RBPJ", "GZMA", "TRGV8",
+  "CD3D", "ANXA1"
+)
+
+plt <- ggdf %>%
+  filter(!is.na(Correlation)) %>%
+  arrange(desc(Correlation)) %>%
+  rownames_to_column("Rank") %>%
+  mutate(
+    Rank = as.integer(Rank),
+    sig = ifelse(pval <= 0.05, "sig", "ns")
+  ) %>%
+  ggplot(mapping = aes(x = Correlation, y = Rank, color = sig)) +
+  geom_point(size = 1.5) +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    color = "black",
+    linewidth = 0.5
+  ) +
+  ggrepel::geom_text_repel(
+    data = . %>% filter(Gene_ID %in% genes_to_label),
+    mapping = aes(label = Gene_ID),
+    size = 2,
+    point.padding = 0.4,
+    box.padding = 0.5,
+    force = 5,
+    force_pull = 0.5,
+    segment.size = 0.3,
+    segment.alpha = 1,
+    max.overlaps = Inf
+  ) +
+  scale_color_manual(values = c("sig" = "#BE1E2D", "ns" = "black")) +
+  scale_y_reverse() +
+  theme_classic()
+
+plt
+```

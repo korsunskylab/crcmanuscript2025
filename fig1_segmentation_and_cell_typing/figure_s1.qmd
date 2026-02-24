@@ -1,0 +1,511 @@
+---
+title: "Figure S1 - (corresponds to Figure 1). Cell type cluster gene expression in MERFISH dataset."
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+# Load packages and data
+source(here::here("src/rload.R"))
+```
+```{r}
+#| label: helper-functions
+#| echo: true
+#| results: hide
+plot_gex_heatmap <- function(
+  df,
+  cell_col = "KNN_celltype_v2",
+  gene_order,
+  cell_order
+) {
+  cell_sym <- rlang::sym(cell_col)
+
+  plt <- df %>%
+    pivot_longer(
+      cols = -all_of(cell_col),
+      names_to = "gene",
+      values_to = "mean_expr"
+    ) %>%
+    filter(gene %in% gene_order) %>%
+    group_by(gene) %>%
+    mutate(z_score = scale(mean_expr)[, 1]) %>%
+    ungroup() %>%
+    mutate(
+      gene = factor(gene, levels = gene_order),
+      !!cell_sym := factor(!!cell_sym, levels = rev(cell_order))
+    ) %>%
+    ggplot(mapping = aes(x = gene, y = !!cell_sym, fill = z_score)) +
+    geom_tile(color = "grey50") +
+    scale_rdbu_fill(limits = c(-2, 0, 2)) +
+    scale_x_discrete(
+      expand = c(0, 0),
+      labels = function(x) gsub("_.*", "", x)
+    ) +
+    scale_y_discrete(expand = c(0, 0)) +
+    vertical_x_text() +
+    labs(
+      x = NULL,
+      y = NULL,
+      fill = "Marker Z-score"
+    ) +
+    theme(legend.position = "none")
+
+  plt
+}
+
+
+plot_cell_barplot <- function(df, cell_order, cell_col) {
+  cell_sym <- rlang::sym(cell_col)
+
+  plt <- df %>%
+    filter(!!cell_sym %in% cell_order) %>%
+    group_by(!!cell_sym) %>%
+    summarize(n = n(), .groups = "drop") %>%
+    mutate(!!cell_sym := factor(!!cell_sym, levels = rev(cell_order))) %>%
+    ggplot(mapping =aes(x = n, y = !!cell_sym)) +
+    geom_bar(stat = "identity") +
+    scale_x_continuous(
+      expand = c(0, 0),
+      trans = "log10",
+      labels = scales::label_scientific()
+    ) +
+    vertical_x_text() +
+    labs(x = "log10(cell count)") +
+    theme(
+      panel.grid.major = element_blank(),
+      legend.position = "none"
+    )
+
+  return(plt)
+}
+```
+
+
+## Figure S1A
+
+```{r}
+#| label: fig-s1a
+#| fig-width: 8
+#| fig-height: 2.75
+#| fig-dpi: 300
+
+# KNN Mid Group
+gex_df <- fread(here(
+  "outputs/gene_expressions",
+  "gex_table_KNN_Mid_Grouped.csv"
+))
+
+# Order selected genes and cell types
+gene_order <- c(
+  "CD2", "CD3D", "TRAC", "CD4", "CD40LG", "CD8A", "CD8B", "TRGC1",
+  "TRDC", "ZBTB16", "KLRF1", "CMC1", "LST1", "RORC", "CD19",
+  "MS4A1", "CD79A", "CD27", "MZB1", "KIT", "CTSG", "CPA3", "CD1E", "CLEC4C",
+  "LAMP3", "CD163", "C1QA", "FCN1", "VCAN", "S100A12", "FCGR3B",
+  "HCAR2", "SEMA3G", "VWF", "ACKR1", "COL4A1", "RGS5", "NOTCH3", "COL1A2",
+  "COL10A1", "MYH11", "S100B", "NRXN1", "CEACAM1", "KRT20", "KRT8"
+)
+cell_order <- c(
+  "Tcd4", "Tcd8", "Tcd8-gdlike", "Tplzf-gdlike",
+  "NK", "ILC", "B", "Plasma", "Mast", "DC",
+  "Macro", "Mono", "Granulocyte", "Endothelial", "Pericyte",
+  "Fibroblast", "Smooth-muscle", "Schwann-cell", "Epi"
+)
+
+# Gene expression heatmap
+plt1 <- plot_gex_heatmap(
+  gex_df,
+  cell_col = "KNN_Mid_Grouped",
+  gene_order,
+  cell_order
+)
+
+# Calculate the cell counts for each group
+ggdf2 <- annots %>%
+  mutate(
+    KNN_Mid_Grouped = case_when(
+      KNN_celltype_v2 %in% c("Tcd4-CXCL13", "Tcd4-IL7R", "Tcd4-TFH", "Tcd4-Treg", "Tcd4-Treg-prolif") ~ "Tcd4",
+      KNN_celltype_v2 %in% c("Tcd8-CXCL13", "Tcd8-CXCL13-prolif", "Tcd8-GZMK", "Tcd8-HOBIT", "Tcd8-CXCL13-LAG3") ~ "Tcd8",
+      KNN_celltype_v2 %in% c("Tcd8-gdlike") ~ "Tcd8-gdlike",
+      KNN_celltype_v2 %in% c("Tplzf-gdlike", "Tplzf-gdlike-prolif") ~ "Tplzf-gdlike",
+      KNN_celltype_v2 %in% c("NK-CD16", "NK-XCL1") ~ "NK",
+      KNN_celltype_v2 %in% c("ILC3") ~ "ILC",
+      KNN_celltype_v2 %in% c("B", "Bgc", "Bgc-CD40", "Bgc-CD40-prolif", "Bgc-GPR183") ~ "B",
+      KNN_celltype_v2 %in% c("Plasma") ~ "Plasma",
+      KNN_celltype_v2 %in% c("Mast") ~ "Mast",
+      KNN_celltype_v2 %in% c("pDC_ASDC", "DC1", "DC2", "DC2-C1Q", "mregDC") ~ "DC",
+      KNN_celltype_v2 %in% c(
+        "Macro", "Macro-C1Q", "Macro-MMP9-APOE",
+        "Macro-SEPP1-LYVE1", "Macro-prolif",
+        "Myeloid-ISG", "Myeloid-ISGhigh"
+      ) ~ "Macro",
+      KNN_celltype_v2 %in% c("Mono-CSF1R", "Mono-S100-VCAN", "Mono-VEGFA", "Myeloid-inflammatory") ~ "Mono",
+      KNN_celltype_v2 %in% c("Granulocyte") ~ "Granulocyte",
+      KNN_celltype_v2 %in% c(
+        "Endothelial", "Endo-arterial", "Endo-capillary",
+        "Endo-lymphatic", "Endo-prolif", "Endo-tip", "Endo-venous"
+      ) ~ "Endothelial",
+      KNN_celltype_v2 %in% c("Pericyte") ~ "Pericyte",
+      KNN_celltype_v2 %in% c(
+        "Fibro-BMP", "Fibro-WNT2B", "Fibro-INHBA",
+        "Fibro-INHBAhigh", "Fibro-MMP3",
+        "Fibro-MYH11", "Fibro-SFRP2"
+      ) ~ "Fibroblast",
+      KNN_celltype_v2 %in% c("Smooth-muscle") ~ "Smooth-muscle",
+      KNN_celltype_v2 %in% c("Schwann-cell") ~ "Schwann-cell",
+      KNN_celltype_v2 %in% c(
+        "Epi-BEST4", "Epi-Entero1-Goblet", "Epi-Entero2",
+        "Epi-IL3RA", "Epi-Stem_TA-like",
+        "Epi-Stem_TA-like-prolif", "Epi-Stem_TA-like-IMGoblet",
+        "Epi-Tuft"
+      ) ~ "Epi",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  group_by(KNN_Mid_Grouped) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  left_join(
+    knn_top_map %>%
+      select(KNN_Top, KNN_Mid) %>%
+      distinct(),
+    by = c("KNN_Mid_Grouped" = "KNN_Mid")
+  ) %>%
+  mutate(
+    KNN_Top = case_when(
+      KNN_Mid_Grouped %in% c("Granulocyte", "Macro", "Mono", "DC") ~ "Myeloid",
+      KNN_Mid_Grouped %in% c("Tcd8-gdlike", "Tplzf-gdlike") ~ "TNKILC",
+      KNN_Mid_Grouped %in% c("Fibroblast", "Endothelial", "Schwann-cell", "Smooth-muscle", "Pericyte") ~ "Strom",
+      TRUE ~ KNN_Top
+    ),
+    KNN_Mid_Grouped = factor(KNN_Mid_Grouped, levels = rev(cell_order))
+  )
+
+# Create first barplot of cell counts between 0 and 1e5
+plt2 <- ggdf2 %>%
+  ggplot(mapping =aes(x = count, y = KNN_Mid_Grouped, fill = KNN_Top)) +
+  geom_bar(stat = "identity") +
+  scale_x_continuous(
+    expand = c(0, 0),
+    trans = "log10",
+    labels = label_scientific()
+  ) +
+  scale_fill_manual(values = cmap_top) +
+  vertical_x_text() +
+  strip_y_axis() +
+  labs(
+    x = NULL
+  ) +
+  theme(
+    panel.grid.major = element_blank(),
+    legend.position = "none"
+  )
+
+plt <- plt1 + plt2 +
+  plot_layout(widths = c(1, 0.15))
+
+plt
+```
+
+## Figure S1B
+
+```{r}
+#| label: fig-s1b
+#| fig-width: 8.25
+#| fig-height: 2.25
+#| fig-dpi: 300
+
+# T cells
+gex_df <- fread(here(
+  "outputs/gene_expressions",
+  "gex_table_TNKILC.csv"
+))
+
+cell_order <- c(
+  "Tcd4-IL7R", "Tcd4-TFH", "Tcd4-CXCL13", "Tcd4-Treg", "Tcd4-Treg-prolif",
+  "Tcd8-GZMK", "Tcd8-HOBIT", "Tcd8-CXCL13", "Tcd8-CXCL13-prolif",
+  "Tcd8-CXCL13-LAG3", "Tcd8-gdlike", "Tplzf-gdlike", "Tplzf-gdlike-prolif",
+  "NK-CD16", "NK-XCL1",
+  "ILC3"
+)
+
+# Canonical markers
+gene_order <- c(
+  "TCF7", "CCR7", "IL7R", "SELL", "LEF1", "BCL6", "CXCR5", "TIGIT", "ZBED2",
+  "CXCL13", "RBPJ", "TOX", "TNFSF4", "IL2RA", "FOXP3", "BATF", "CTLA4", "TNFRSF4",
+  "STMN1", "MKI67", "HMGB2", "KLRG1", "GZMK", "TIGIT_1", "CD8A", "CD8B",
+  "ZNF683", "CXCL13_1", "HSPA1A", "STMN1_1", "MKI67_1", "HMGB2_1",
+  "ITGAE", "CCL5", "ENTPD1", "PDCD1", "HAVCR2", "IFNG", "LAG3", "TRDC",
+  "TRGC1", "ZBTB16", "STMN1_2", "MKI67_2", "HMGB2_2", "FCGR3A", "FGFBP2",
+  "KLRF1", "GNLY", "PRF1", "XCL1", "CMC1", "LST1", "RORC"
+)
+
+# Chemokines
+gene_order2 <- c(
+  "CCR7", "CXCR4", "CXCR5", "CCR10", "CCR9", "CCR4", "CCR2", "CCR6",
+  "CCR8", "CCR3", "CXCR2", "CCR1", "CXCR3", "CCR5", "CXCR6", "CXCR1"
+)
+
+plt1 <- plot_gex_heatmap(
+  gex_df,
+  cell_col = "KNN_celltype_v2", gene_order, cell_order
+)
+plt2 <- plot_gex_heatmap(
+  gex_df,
+  cell_col = "KNN_celltype_v2", gene_order2, cell_order
+) +
+  strip_y_axis()
+plt3 <- plot_cell_barplot(
+  annots, cell_order,
+  cell_col = "KNN_celltype_v2"
+) +
+  strip_y_axis()
+
+plt <- plt1 + plt2 + plt3 +
+  plot_layout(widths = c(1, 0.3, 0.125))
+
+plt
+```
+
+## Figure S1C
+
+```{r}
+#| label: fig-s1c
+#| fig-width: 8.25
+#| fig-height: 2.25
+#| fig-dpi: 300
+
+# Myeloid cells 
+gex_df <- fread(here(
+  "outputs/gene_expressions",
+  "gex_table_Myeloid.csv"
+))
+
+cell_order <- c(
+  "pDC_ASDC", "DC1", "mregDC", "DC2", "DC2-C1Q",
+  "Macro", "Macro-SEPP1-LYVE1", "Macro-MMP9-APOE", "Macro-C1Q",
+  "Macro-prolif", "Myeloid-ISGhigh", "Myeloid-ISG", "Mono-CSF1R",
+  "Mono-S100-VCAN", "Myeloid-inflammatory", "Mono-VEGFA", "Granulocyte"
+)
+
+gene_order <- c(
+  "CXCR3", "CLEC4C", "LILRA4", "CLEC9A", "XCR1", "CCL19", "CCL22", "LAMP3", "CCR7",
+  "CD1E", "CD1C", "FCER1A", "C1QA", "CD163", "CXCL16", "HIF1A", "SEPP1", "Lyve1",
+  "FOLR2", "SPP1", "MMP9", "MMP12", "CCL18", "APOE", "C1QA_1", "C1QB", "C1QC", "AXL",
+  "STMN1", "MKI67", "HMGB2", "ISG15", "STAT1", "CXCL9", "CXCL10", "CD274",
+  "GBP1", "TAP1", "IDO1", "CSF1R", "LYZ", "S100A8", "VCAN", "FCN1", "CSF3R", "CCL3",
+  "CCL20", "CXCL3", "CXCL2", "TNF", "IL6", "IL1B", "IL1A", "NLRP3", "VEGFA",
+  "EREG", "FCGR3B", "HCAR2", "PTGS2", "CXCL8"
+)
+
+plt1 <- plot_gex_heatmap(
+  gex_df,
+  cell_col = "KNN_celltype_v2", gene_order, cell_order
+)
+plt2 <- plot_cell_barplot(annots, cell_order, cell_col = "KNN_celltype_v2") +
+  strip_y_axis()
+
+plt <- plt1 + plt2 +
+  plot_layout(widths = c(1, 0.2))
+
+plt
+```
+
+## Figure S1D
+
+```{r}
+#| label: fig-s1d
+#| fig-width: 3
+#| fig-height: 1.75
+#| fig-dpi: 300
+
+# B and plasma cells
+gex_df <- fread(here(
+  "outputs/gene_expressions",
+  "gex_table_BPlasma.csv"
+))
+
+cell_order <- c(
+  "Plasma", "B", "Bgc", "Bgc-GPR183", "Bgc-CD40", "Bgc-CD40-prolif"
+)
+
+gene_order <- c(
+  "MZB1", "CD27", "CD38", "CD79A", "MS4A1", "CD19", "CXCR5",
+  "CD74", "TNFRSF13B", "GPR183", "CD40", "STMN1", "HMGB2", "MKI67"
+)
+
+plt1 <- plot_gex_heatmap(
+  gex_df,
+  cell_col = "KNN_celltype_v2", gene_order, cell_order
+)
+
+plt2 <- plot_cell_barplot(annots, cell_order, cell_col = "KNN_celltype_v2") +
+  strip_y_axis()
+plt <- plt1 + plt2 +
+  plot_layout(widths = c(1, 0.2))
+
+plt
+```
+
+## Figure S1E
+
+```{r}
+#| label: fig-s1e
+#| fig-width: 5
+#| fig-height: 1.75
+#| fig-dpi: 300
+
+# Epithelial cells
+gex_df <- fread(here(
+  "outputs/gene_expressions",
+  "gex_table_Epithelial.csv"
+))
+
+cell_order <- c(
+  "Epi-Stem_TA-like", "Epi-Stem_TA-like-prolif", "Epi-Stem_TA-like-IMGoblet",
+  "Epi-IL3RA", "Epi-Entero1-Goblet", "Epi-Entero2",
+  "Epi-BEST4", "Epi-Tuft"
+)
+
+gene_order <- c(
+  "LGR5", "LEFTY1", "ALDH1B1", "EPHB3", "CDCA7", "STMN1", "MKI67", "HMGB2", "SPINK1", "OLFM4",
+  "ITLN1", "CLCA1", "MUC2", "CHGA", "IL3RA", "CLCA4", "AQP8", "TMIGD1", "SULT1A2", "SLC26A3", "SLC26A2",
+  "CA1", "GUCA2B", "BEST4", "AZGP1", "HCK", "HPGDS", "PTGS1"
+)
+
+plt1 <- plot_gex_heatmap(
+  gex_df,
+  cell_col = "KNN_celltype_v2", gene_order, cell_order
+)
+
+plt2 <- plot_cell_barplot(annots, cell_order, cell_col = "KNN_celltype_v2") +
+  strip_y_axis()
+plt <- plt1 + plt2 +
+  plot_layout(widths = c(1, 0.2))
+
+plt
+```
+
+## Figure S1F
+
+```{r}
+#| label: fig-s1f
+#| fig-width: 4.5
+#| fig-height: 1.6
+#| fig-dpi: 300
+
+# Endothelial cells
+gex_df <- fread(here(
+  "outputs/gene_expressions",
+  "gex_table_Endothelial.csv"
+))
+
+cell_order <- c(
+  "Endo-arterial", "Endo-capillary", "Endo-venous", "Endo-lymphatic", "Endothelial", "Endo-tip", "Endo-prolif"
+)
+
+gene_order <- c(
+  "BMX", "SEMA3G", "HEY1", "ACE", "CXCL12", "GJA4", "GJA5", "VEGFC", "NOTCH3",
+  "CD36", "ADGRG6", "ACKR1", "IL1R1", "CCL14", "CSF3", "SELE", "SELP", "VCAM1",
+  "CCL21", "Lyve1", "RGS5", "CD34", "HIF1A", "ESM1", "PDGFB", "APLN", "ANGPT2",
+  "PGF", "CXCR4", "PDGFRB", "ACTA2", "STMN1", "HMGB2", "MKI67"
+)
+
+plt1 <- plot_gex_heatmap(
+  gex_df,
+  cell_col = "KNN_celltype_v2", gene_order, cell_order
+)
+
+plt2 <- plot_cell_barplot(annots, cell_order, cell_col = "KNN_celltype_v2") +
+  strip_y_axis()
+
+plt <- plt1 + plt2 +
+  plot_layout(widths = c(1, 0.15))
+
+plt
+```
+
+## Figure S1G
+
+```{r}
+#| label: fig-s1g
+#| fig-width: 4
+#| fig-height: 1.6
+#| fig-dpi: 300
+
+# Fibroblast cells
+gex_df <- fread(here(
+  "outputs/gene_expressions",
+  "gex_table_Fibroblast.csv"
+))
+
+cell_order <- c(
+  "Fibro-SFRP2", "Fibro-BMP", "Fibro-WNT2B", "Fibro-INHBAhigh",
+  "Fibro-INHBA", "Fibro-MMP3", "Fibro-MYH11"
+)
+
+gene_order <- c(
+  "MFAP5", "SFRP2", "CXCL12", "CXCL14", "CXCR4", "BMP4",
+  "ENHO", "BMP5", "BMP2", "WNT2B", "CCL2", "GREM1", "INHBA",
+  "FAP", "PDPN", "MMP1", "MMP3", "CXCL3", "CXCL5", "CXCL8",
+  "CSF3", "IL24", "RSPO3", "TAGLN", "ACTA2", "MYH11"
+)
+
+plt1 <- plot_gex_heatmap(
+  gex_df,
+  cell_col = "KNN_celltype_v2", gene_order, cell_order
+)
+plt2 <- plot_cell_barplot(annots, cell_order, cell_col = "KNN_celltype_v2") +
+  strip_y_axis()
+
+plt <- plt1 + plt2 +
+  plot_layout(widths = c(1, 0.15))
+
+plt
+```
+
+
+## Figure S1H
+
+```{r}
+#| label: fig-s1h
+#| fig-width: 18
+#| fig-height: 9
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  filter(sample_name == "G4423") %>%
+  rotate_xy(., angle_deg = 142)
+
+# Coloring by tessera tile annotation
+plt <- ggdf %>%
+  ggplot(mapping =aes(x = x_rotated, y = y_rotated, fill = KNN_Top)) +
+  geom_point_rast(size = 0.35, shape = 21, stroke = NA) +
+  scale_fill_manual(values = cmap_top) +
+  theme_void() +
+  theme(legend.position = "none")
+plt <- add_scale_bar(plt, scale_len = 1000, scale_width = 1.5, text_size = 0)
+
+plt
+```
