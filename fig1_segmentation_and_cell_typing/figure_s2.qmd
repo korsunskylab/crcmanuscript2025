@@ -1,0 +1,284 @@
+---
+title: "Figure S2 - (corresponds to Figure 1). Cell type composition differences in pathology regions, MMRd versus MMRp CRC, and epithelial versus stromal regions in the tumor."
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: show
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+# Load packages and data
+source(here::here("src/rload.R"))
+```
+
+## Figure S2A
+
+```{r}
+#| label: fig-s2a
+#| fig-width: 6.3
+#| fig-height: 2
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  group_by(KNN_Top, pathology_region, PatientID) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  mutate(
+    KNN_Top = factor(KNN_Top, levels = rev(knn_top_ord)),
+    pathology_region = factor(pathology_region, levels = path_ord),
+    PatientID = factor(PatientID, levels = patient_ord)
+  )
+
+ggdf_counts <- ggdf %>%
+  group_by(PatientID, pathology_region) %>%
+  summarize(total_count = sum(count), .groups = "drop") %>%
+  mutate(
+    total_count_lab = scientific(total_count, digits = 2),
+    PatientID = factor(PatientID, levels = patient_ord)
+  )
+
+plt <- ggplot() +
+  geom_bar(
+    data = ggdf,
+    mapping = aes(x = PatientID, y = count, fill = KNN_Top),
+    stat = "identity", position = "fill"
+  ) +
+  geom_text(
+    data = ggdf_counts,
+    mapping = aes(x = PatientID, y = 0.85, label = total_count_lab),
+    angle = 90, size = 1.5
+  ) +
+  facet_grid(
+    ~pathology_region,
+    scales = "free", space = "free",
+    labeller = labeller(
+      pathology_region =
+        c(
+          "tumor" = "Tumor",
+          "tumor_invasive_margin" = "Tumor IM",
+          "tumor_luminal_margin" = "Tumor LM",
+          "non_neoplastic_mucosa" = "Non-neo. muc.",
+          "non_neoplastic_other" = "Non-neo. other",
+          "lymphoid_structure" = "Lymphoid structure"
+        )
+    )
+  ) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = cmap_top) +
+  vertical_x_text() +
+  labs(
+    x = "PatientID",
+    y = "Proportion of cells in region",
+    fill = "Lineage"
+  ) +
+  theme(legend.position = "none")
+
+plt
+```
+
+## Figure S2B
+
+```{r}
+#| label: fig-s2b
+#| fig-width: 10
+#| fig-height: 3.5
+#| fig-dpi: 300
+
+glmm_res <- fread(here(
+  outdir,
+  "GLMM_tables",
+  "GLMM_pathology_region_tumor_vs_non_neoplastic_mucosa.csv"
+))
+
+# Arrange the cell types to be plotted
+# Cell types enriched in tumor then non-neoplastic mucosa
+# TNKILC, B, Mast, Myeloid, Stromal
+celltypes_to_keep <- c(
+  "Tcd4-CXCL13", "Tcd8-CXCL13", "Tcd8-CXCL13-prolif", "Tcd8-CXCL13-LAG3", "Tplzf-gdlike-prolif",
+  "Macro-MMP9-APOE", "Myeloid-ISG", "Endo-arterial", "Endothelial", "Endo-tip", "Endo-prolif",
+  "Fibro-SFRP2", "Fibro-COL10A1", "Fibro-BMP4-INHBA", "Fibro-MYH11",
+  "Tcd4-IL7R", "Tplzf-gdlike", "NK-XCL1", "ILC3", "B", "Bgc-GPR183", "Bgc-CD40",
+  "Plasma", "Mast", "pDC_ASDC", "mregDC", "DC2", "Macro-SEPP1-LYVE1",
+  "Endo-capillary", "Fibro-WNT2B"
+)
+
+ggdf <- annots %>%
+  mutate(
+    pathology_region = case_when(
+      grepl("tumor", pathology_region) ~ "tumor",
+      TRUE ~ pathology_region
+    )
+  ) %>%
+  group_by(PatientID, pathology_region, KNN_Grouped, KNN_Top, KNN_celltype_v2) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  group_by(PatientID, KNN_Grouped, pathology_region) %>%
+  mutate(
+    total_n = sum(n),
+    freq = n / total_n
+  ) %>%
+  filter(
+    pathology_region %in% c("tumor", "non_neoplastic_mucosa"),
+    KNN_celltype_v2 %in% celltypes_to_keep
+  ) %>%
+  mutate(
+    pathology_region = factor(pathology_region, levels = path_ord),
+    KNN_Top = factor(KNN_Top, levels = rev(knn_top_ord)),
+    KNN_celltype_v2 = factor(KNN_celltype_v2, levels = celltypes_to_keep)
+  )
+
+# Calculate max 'freq' for each cell type to determine y.position and reformat
+# Reformat glmm res all to add to ggplot
+max_freq_per_celltype <- ggdf %>%
+  group_by(KNN_celltype_v2) %>%
+  summarize(max_freq = max(freq, na.rm = TRUE), .groups = "drop")
+
+ggdf_stat <- glmm_res %>%
+  filter(
+    !grepl("intercept", rowname)
+  ) %>%
+  mutate(
+    group1 = "tumor",
+    group2 = "non_neoplastic_mucosa"
+  ) %>%
+  rename(KNN_celltype_v2 = rowname) %>%
+  # Join with max_freq_per_celltype to get the y.position
+  left_join(max_freq_per_celltype, by = "KNN_celltype_v2") %>%
+  mutate(
+    y.position =
+      case_when(
+        (group1 == "tumor") & (group2 == "non_neoplastic_mucosa") ~ max_freq * 1.25,
+        TRUE ~ max_freq * 1.05
+      ),
+    padj_format = format(signif(padj, 2), scientific = TRUE),
+    KNN_celltype_v2 = factor(KNN_celltype_v2, levels = celltypes_to_keep)
+  ) %>%
+  filter(!is.na(y.position))
+
+plt <- ggplot() +
+  geom_boxplot(
+    ggdf,
+    mapping = aes(x = pathology_region, y = freq, fill = pathology_region),
+    lwd = 0.5, median.linewidth = 1,
+    outlier.shape = NA
+  ) +
+  geom_point(
+    ggdf,
+    mapping = aes(x = pathology_region, y = freq, fill = pathology_region),
+    position = position_jitter(width = 0.15),
+    size = 0.75, stroke = 0.15
+  ) +
+  stat_pvalue_manual(
+    ggdf_stat,
+    label = "padj_format",
+    tip.length = 0.01,
+    size = 2
+  ) +
+  scale_fill_manual(values = cmap_path_annot) +
+  facet_wrap(
+    ~KNN_celltype_v2,
+    scales = "free_y", ncol = 11,
+    labeller = labeller(KNN_celltype_v2 = function(value) {
+      wrapped_labels <- label_wrap_gen(width = 13)(gsub("-", " ", value))
+      return(wrapped_labels)
+    })
+  ) +
+  strip_x_axis() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(
+    y = "Cell Frequency"
+  ) +
+  theme(legend.position = "none") +
+  coord_cartesian(clip = "off")
+
+plt
+```
+
+## Figure S2C
+
+```{r}
+#| label: fig-s2c
+#| fig-width: 7
+#| fig-height: 2.5
+#| fig-dpi: 300
+
+glmm_res <- fread(here(
+  outdir,
+  "GLMM_tables",
+  "GLMM_tumor_MMRstatus_MMRd_vs_MMRp.csv"
+))
+
+plt <- plot_glmm_barplot(glmm_res)
+
+plt
+```
+
+## Figure S2D
+
+```{r}
+#| label: fig-s2d
+#| fig-width: 7
+#| fig-height: 2.5
+#| fig-dpi: 300
+
+glmm_res <- fread(here(
+  outdir,
+  "GLMM_tables",
+  "GLMM_tessera_annotation_stromal_vs_epithelial.csv"
+))
+
+plt <- plot_glmm_barplot(glmm_res)
+
+plt
+```
+
+## Figure S2E
+
+```{r}
+#| label: fig-s2e
+#| fig-width: 3
+#| fig-height: 2
+#| fig-dpi: 300
+
+ggdf <- annots %>%
+  group_by(PatientID, tessera_annotation) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  mutate(
+    PatientID = factor(PatientID, levels = patient_ord),
+    tessera_annotation = factor(tessera_annotation, levels = rev(c("epithelial_tile", "stromal_tile", "non_tumor", "granulocyte_cap")))
+  )
+
+plt <- ggdf %>%
+  ggplot(mapping = aes(x = PatientID, y = count, fill = tessera_annotation)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = cmap_tessera_annot) +
+  labs(
+    x = "Patient",
+    y = "Proportion",
+    fill = "Tessera tile\nannotation"
+  ) +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  vertical_x_text()
+
+plt
+```

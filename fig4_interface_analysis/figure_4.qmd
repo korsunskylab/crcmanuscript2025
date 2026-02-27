@@ -1,0 +1,42 @@
+---
+title: "Figure 4 - CD8+ CXCL13+ T cells accumulate on the stromal side of hub interfaces and infiltrate the epithelium."
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+source(here::here("src/rload.R"))
+```
+
+## Figure 4A
+```{r}
+#| label: fig-4a
+#| fig-width: 6
+#| fig-height: 4
+
+# Made in Adobe Illustrator
+knitr::include_graphics("../outputs/sample_viz/Fig4A_G4423_hub_interface.png")
+```

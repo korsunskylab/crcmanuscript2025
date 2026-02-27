@@ -1,0 +1,226 @@
+---
+title: "Figure S4 - (corresponds to Figure 3 and 4). Extended data on cellular composition and spatial organization of CXCR3L+ hubs."
+author: "CRC MERFISH Project"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: show
+    embed-resources: true
+    crossref:
+      fig-title: ""
+  pdf:
+    documentclass: article
+    crossref:
+      fig-title: ""
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| echo: true
+#| message: false
+#| warning: false
+#| results: hide
+#| cache: false
+
+# Load packages and data
+source(here::here("src/rload.R"))
+```
+
+## Figure S4A
+
+```{r}
+#| label: fig-s4a
+#| fig-width: 2
+#| fig-height: 2
+
+cxcl_freq <- annots %>%
+  mutate(
+    path_reg = case_when(
+      grepl("tumor", pathology_region) ~ "tumor",
+      TRUE ~ pathology_region
+    )
+  ) %>%
+  group_by(PatientID, path_reg, cxcl_pos_tile) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  group_by(PatientID, path_reg) %>%
+  mutate(
+    total_count = sum(count),
+    freq = count / total_count
+  ) %>%
+  filter(cxcl_pos_tile == "CXCL_pos") %>%
+  mutate(
+    path_reg = factor(
+      path_reg,
+      levels = c(
+        "tumor",
+        "non_neoplastic_mucosa",
+        "non_neoplastic_other",
+        "lymphoid_structure"
+      )
+    )
+  )
+
+plt <- cxcl_freq %>%
+  ggplot(mapping = aes(x = path_reg, y = freq, group = path_reg, fill = path_reg)) +
+  geom_boxplot(
+    outlier.shape = NA,
+    lwd = 0.5,
+    median.linewidth = 0.5
+  ) +
+  geom_point(
+    position = position_jitter(width = 0.125),
+    size = 1.5, stroke = 0.25
+  ) +
+  scale_x_discrete(
+    labels = c(
+      "Tumor",
+      "Non-neo.\nmucosa",
+      "Non-neo.\nother",
+      "Lymphoid\nStructure"
+    )
+  ) +
+  scale_fill_manual(values = cmap_path_annot) +
+  labs(
+    x = NULL,
+    y = "Frequency CXCL3L- mask positive"
+  ) +
+  vertical_x_text() +
+  theme(legend.position = "none")
+
+plt
+```
+
+## Figure S4B
+
+```{r}
+#| label: fig-s4b
+#| fig-width: 6
+#| fig-height: 3.25
+
+# Filter for CXCL+ niches that exist in the tumor
+cxcl_tumor_niches <- annots %>%
+  filter(
+    cxcl_pos_tile == "CXCL_pos",
+    cxcl_niche != "",
+    grepl("tumor", pathology_region)
+  ) %>%
+  group_by(cxcl_niche, cxcl_niche_comp) %>%
+  summarize(count = n()) %>%
+  pull(cxcl_niche)
+
+# Calculate the composition of the niches
+cxcl_niche_comp <- annots %>%
+  filter(cxcl_niche %in% cxcl_tumor_niches) %>%
+  group_by(cxcl_niche, cxcl_niche_comp, tessera_annotation) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  pivot_wider(
+    names_from = "tessera_annotation",
+    values_from = "count",
+    values_fill = 0
+  ) %>%
+  mutate(
+    total_niche_size = epithelial_tile + stromal_tile + non_tumor,
+    stromal_fraction = stromal_tile / total_niche_size
+  )
+
+# Order CXCL niches based on stromal fraction and total niche size
+cxcl_niche_ord <- cxcl_niche_comp %>%
+  arrange(stromal_fraction, total_niche_size) %>%
+  pull(cxcl_niche)
+
+# Plot 1: distribution of epithelial and stromal tiles per niche
+plt1 <- cxcl_niche_comp %>%
+  select(cxcl_niche, stromal_tile, epithelial_tile) %>%
+  pivot_longer(
+    cols = -cxcl_niche,
+    names_to = "annotation",
+    values_to = "count"
+  ) %>%
+  mutate(
+    cxcl_niche = factor(cxcl_niche, levels = cxcl_niche_ord),
+    annotation = factor(annotation, levels = c("epithelial_tile", "stromal_tile"))
+  ) %>%
+  ggplot(mapping = aes(x = cxcl_niche, y = count, fill = annotation)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(
+    values = c(
+      "stromal_tile" = "#18527e",
+      "epithelial_tile" = "#a97f2f"
+    )
+  ) +
+  strip_x_axis() +
+  labs(
+    y = "Tile\ncomposition",
+    fill = NULL
+  )
+
+# Plot 2: niche classification (epithelial-only, stromal-only, mixed)
+plt2 <- cxcl_niche_comp %>%
+  mutate(
+    cxcl_niche = factor(cxcl_niche, levels = cxcl_niche_ord),
+    y_axis = 1
+  ) %>%
+  ggplot(mapping = aes(x = cxcl_niche, y = y_axis, fill = cxcl_niche_comp)) +
+  geom_tile() +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_fill_manual(
+    values = c(
+      "stromal_only" = "#18527e",
+      "epithelial_only" = "#a97f2f",
+      "mixed" = "#697852"
+    )
+  ) +
+  strip_y_axis() +
+  strip_x_axis() +
+  theme(legend.position = "none")
+
+# Plot 3: KNN cell type composition in niches
+ggdf2 <- annots %>%
+  filter(cxcl_niche %in% cxcl_tumor_niches) %>%
+  group_by(cxcl_niche, KNN_Top) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  mutate(cxcl_niche = factor(cxcl_niche, levels = cxcl_niche_ord))
+
+plt3 <- ggdf2 %>%
+  ggplot(mapping = aes(x = cxcl_niche, y = count, fill = KNN_Top)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = cmap_top) +
+  labs(
+    y = "Cell type composition",
+    fill = NULL
+  ) +
+  strip_x_axis()
+
+# Plot 4: niche size
+plt4 <- cxcl_niche_comp %>%
+  mutate(cxcl_niche = factor(cxcl_niche, levels = cxcl_niche_ord)) %>%
+  ggplot(mapping = aes(x = cxcl_niche, y = total_niche_size)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_continuous(
+    trans = "log10",
+    expand = c(0, 0)
+  ) +
+  labs(
+    y = "log10(hub size)"
+  ) +
+  strip_x_axis()
+
+plt <- plt1 + plt2 + plt3 + plt4 +
+  plot_layout(ncol = 1, heights = c(0.3, 0.15, 0.7, 0.3))
+
+plt
+```
+
