@@ -25,3 +25,11 @@ Generates neighborhood composition summaries corresponding to Figure 5B and rela
 These analyses build on:
 - Region assignments from Figure 3
 - Interface definitions from Figure 4
+
+---
+# Manuscript Figures
+
+## Figure_5.qmd
+Document generating Figure 5 panels. 
+
+

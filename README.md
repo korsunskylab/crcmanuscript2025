@@ -21,6 +21,7 @@ The repository is organized by figure and includes representative notebooks illu
 | `fig3_tessera_tissue_regions/` | Figure 3 | Tessera spatial tiling and tissue region identification |
 | `fig4_interface_analysis/` | Figure 4 | Tumor–immune interface construction and MSI vs MSS / hub+ vs hub− comparisons |
 | `fig5_colocalization/` | Figure 5 | Spatial colocalization and neighborhood composition analyses |
+| `fig6_cxcr3l_hubs_and_tb_aggregates` | Figure 6 | CXCR3L hubs and TB aggregate comparison |
 
 Each directory contains its own `README.md` with further details.
 

@@ -21,3 +21,15 @@ Cluster-level differential expression analyses were performed to define region-s
 ### Execution Notes
 
 Region identification depends on harmonized cell embeddings from Figure 1.
+
+
+
+---
+# Manuscript Figures
+
+## Figure_3.qmd
+Document generating Figure 3 panels. 
+
+## Figure_s4.qmd
+Document generating Figure S4 panels. 
+

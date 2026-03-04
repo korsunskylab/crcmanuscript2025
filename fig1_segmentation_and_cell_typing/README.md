@@ -1,6 +1,6 @@
 # Figure 1 — Segmentation and Cell Typing Pipeline
 
-This directory contains the complete workflow used to generate Figure 1, starting from raw MERFISH output and ending with harmonized, labeled single-cell profiles and marker gene identification.
+This directory contains the workflow used to generate Figure 1, starting from raw MERFISH output and ending with harmonized, labeled single-cell profiles and marker gene identification.
 
 The pipeline proceeds through segmentation, hierarchical cell typing, harmonization, and statistical modeling. Each stage is organized below.
 
@@ -37,6 +37,12 @@ Generalized linear mixed models (GLMMs) were used to identify cluster-specific m
 
 ---
 
+## Step 3 - H&E and DAPI coregistration
+
+Coregistration of DAPI and H&E images using VALIS (Gatenbee et al. 2023).
+
+-- 
+
 ### Execution Order
 
 1. Segmentation  
@@ -45,3 +51,18 @@ Generalized linear mixed models (GLMMs) were used to identify cluster-specific m
 4. Fine typing  
 5. Harmonization  
 6. GLMM marker analysis
+
+---
+# Manuscript Figures
+
+## figure_1.qmd
+
+Document generating Figure 1 panels. 
+
+## figure_s1.qmd
+
+Document generating Figure S1 panels.
+
+## figure_s2.qmd
+
+Document generating Figure S2 panels.

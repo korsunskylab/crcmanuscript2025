@@ -44,3 +44,13 @@ These notebooks generate supplementary panels and extended gene-patterning analy
 Interface analyses require:
 - Harmonized cell embeddings (Figure 1)
 - Region definitions (Figure 3)
+
+---
+# Manuscript Figures
+
+## Figure_4.qmd
+Document generating Figure 4 panels. 
+
+## Figure_s8.qmd
+Document generating Figure S8 panels. 
+
