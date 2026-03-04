@@ -29,7 +29,7 @@ These analyses build on:
 ---
 # Manuscript Figures
 
-## Figure_5.qmd
-Document generating Figure 5 panels. 
-
+| Figure | Description |
+|---|---|
+| `figure_5.qmd` | Figure 5 |
 

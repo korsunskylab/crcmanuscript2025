@@ -43,7 +43,7 @@ Coregistration of DAPI and H&E images using VALIS (Gatenbee et al. 2023).
 
 -- 
 
-### Execution Order
+## Execution Order
 
 1. Segmentation  
 2. Coarse typing  
@@ -51,18 +51,13 @@ Coregistration of DAPI and H&E images using VALIS (Gatenbee et al. 2023).
 4. Fine typing  
 5. Harmonization  
 6. GLMM marker analysis
+7. VALIS coregistration
 
 ---
 # Manuscript Figures
 
-## figure_1.qmd
-
-Document generating Figure 1 panels. 
-
-## figure_s1.qmd
-
-Document generating Figure S1 panels.
-
-## figure_s2.qmd
-
-Document generating Figure S2 panels.
+| Figure | Description |
+|---|---|
+| `figure_1.qmd` | Figure 1 |
+| `figure_s1.qmd` | Figure S1 |
+| `figure_s2.qmd` | Figure S2 |

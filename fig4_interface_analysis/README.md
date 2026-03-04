@@ -48,9 +48,8 @@ Interface analyses require:
 ---
 # Manuscript Figures
 
-## Figure_4.qmd
-Document generating Figure 4 panels. 
-
-## Figure_s8.qmd
-Document generating Figure S8 panels. 
+| Figure | Description |
+|---|---|
+| `figure_4.qmd` | Figure 4 |
+| `figure_s8.qmd` | Figure S8 |
 

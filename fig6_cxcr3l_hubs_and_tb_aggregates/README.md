@@ -8,8 +8,7 @@ Analyses here build on the tessera-based tissue tiling, CXCR3L\(+\) hub annotati
 ---
 # Manuscript Figures
 
-## Figure_6.qmd
-Document generating Figure 6 panels. 
-
-## Figure_6.qmd
-Document generating Figure S9 panels. 
+| Figure | Description |
+|---|---|
+| `figure_6.qmd` | Figure 6 |
+| `figure_s9.qmd` | Figure S9 |
