@@ -17,7 +17,7 @@ The repository is organized by figure and includes representative notebooks illu
 | Directory | Figure | Description |
 |---|---|---|
 | `fig1_segmentation_and_cell_typing/` | Figure 1 | Baysor segmentation, hierarchical cell typing (coarse → fine), cross-sample harmonization, and GLMM marker analysis |
-| `fig2_pathology_annotations/` | Figure 2 | Pathology region annotations |
+| `fig2_luminal_margin_analysis/` | Figure 2 | Luminal tumor margin analysis |
 | `fig3_tessera_tissue_regions/` | Figure 3 | Tessera spatial tiling and tissue region identification |
 | `fig4_interface_analysis/` | Figure 4 | Tumor–immune interface construction and MSI vs MSS / hub+ vs hub− comparisons |
 | `fig5_colocalization/` | Figure 5 | Spatial colocalization and neighborhood composition analyses |
