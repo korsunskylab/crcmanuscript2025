@@ -179,6 +179,120 @@ plot_pseudobulk_boxplot <- function(ggdf_gex, res_DEG, genes_to_plot) {
 }
 ```
 
+## Figure 5A
+```{r}
+#| label: fig-5a
+#| fig-width: 7
+#| fig-height: 3.5
+anchors_ord <- rev(c(
+  "Tcd8-CXCL13-comb", "Tcd8-CXCL13-LAG3",
+  "Tcd8-HOBIT", "Tcd8-gdlike",
+  "Tplzf-gdlike-comb", "Tcd8-GZMK",
+  "Tcd4-CXCL13", "Tcd4-Treg-comb",
+  "Tcd4-IL7R", "Tcd4-TFH"
+))
+
+df <- fread(here(
+  "data/other",
+  "Fig5A_0_to_neg40_hub_T_as_anchor_EPI_COLLAPSED.csv"
+)) %>%
+  mutate(
+    anchor = factor(anchor, levels = anchors_ord),
+    sig = case_when(
+      padj < 0.05 ~ "*",
+      TRUE ~ ""
+    )
+  )
+
+# Filter for neighbors that have at least one significant anchor
+neighbors_sig <- df %>%
+  filter(sig == "*") %>%
+  group_by(neighbor) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  pull(neighbor)
+
+
+# Update with their clustering?
+neighbors_ord <- c(
+  "Epi", "Granulocyte", "Macro-comb", "Macro-SEPP1-LYVE1", "Myeloid-ISG", "pDC_ASDC", "mregDC",
+  "Endo-tip", "Fibro-INHBA", "Fibro-MMP3", "Endo-arterial", "Fibro-BMP", "Endo-capillary",
+  "Endo-venous", "Fibro-WNT2B", "Fibro-INHBAhigh", "Endo-comb",
+  "Tcd4-TFH", "Tcd4-IL7R", "Tcd8-GZMK", "Tcd4-CXCL13", "Tcd4-Treg-comb",
+  "NK-CD16", "Tcd8-CXCL13-comb", "Tcd8-HOBIT",
+  "Tplzf-gdlike-comb", "Tcd8-gdlike", "Tcd8-CXCL13-LAG3",
+  "Bgc-CD40-comb", "Bgc-GPR183", "B", "Plasma"
+)
+
+ggdf <- df %>%
+  filter(
+    neighbor %in% neighbors_sig,
+    neighbor %in% neighbors_ord
+  ) %>%
+  mutate(neighbor = factor(neighbor, levels = neighbors_ord))
+
+
+plt1 <- ggdf %>%
+  ggplot(mapping = aes(x = neighbor, y = anchor, fill = logFC)) +
+  geom_tile() +
+  geom_text(mapping = aes(label = sig)) +
+  scale_fill_gradientn(
+    colors = rev(RColorBrewer::brewer.pal(11, "PuOr")),
+    values = scales::rescale(c(-1, 0, 1)),
+    limits = c(-1, 1),
+    oob = scales::squish,
+    na.value = "lightgrey",
+  ) +
+  vertical_x_text() +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  strip_x_axis() +
+  labs(
+    x = "Neighbor",
+    y = "Anchor",
+    fill = "Colocalization logFC-\nT cells as anchor"
+  )
+
+plt2 <- df %>%
+  select(neighbor) %>%
+  distinct() %>%
+  filter(neighbor %in% neighbors_ord) %>%
+  left_join(
+    knn_top_map %>%
+      select(KNN_Top, KNN_celltype_v2),
+    by = c("neighbor" = "KNN_celltype_v2")
+  ) %>%
+  mutate(
+    neighbor = factor(neighbor, levels = neighbors_ord),
+    KNN_Top = case_when(
+      neighbor == "Epi" ~ "Epi",
+      neighbor == "Endo-comb" ~ "Strom",
+      neighbor == "Macro-comb" ~ "Myeloid",
+      neighbor == "Bgc-CD40-comb" ~ "B",
+      neighbor %in% c("Tcd4-Treg-comb", "Tplzf-gdlike-comb") ~ "TNKILC",
+      TRUE ~ KNN_Top
+    )
+  ) %>%
+  ggplot(mapping = aes(x = neighbor, y = 1, fill = KNN_Top)) +
+  geom_tile() +
+  scale_fill_manual(values = cmap_top) +
+  vertical_x_text() +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  strip_y_axis() +
+  labs(
+    x = "Neighbor"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.ticks.x = element_blank()
+  )
+
+
+plt <- plt1 + plt2 +
+  plot_layout(nrow = 2, heights = c(1, 0.06))
+plt
+```
+
 ## Figure 5B
 ```{r}
 #| label: fig-5b
