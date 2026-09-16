@@ -1,0 +1,70 @@
+old_label,dest
+cB1 (B IGD+IgM+),B
+cB2 (B GC-like),Bgc-GPR183
+cB3 (B CD40+ GC-like),Bgc-CD40
+cM01 (Monocyte),Myeloid-inflamm
+cM02 (Macrophage-like),Myeloid-ISGlow
+cM03 (DC1),Myeloid-DC1
+cM04 (DC2),Myeloid-DC2
+cM05 (DC2 C1Q+),Myeloid-DC2-C1Q
+cM06 (DC IL22RA2),cM06 (DC IL22RA2)
+cM07 (pDC),Myeloid-DC-pDC_ASDC
+cM08 (AS-DC),Myeloid-DC-pDC_ASDC
+cM09 (mregDC),Myeloid-DCmreg
+cM10 (Granulocyte),Myeloid-Granulo
+cS01 (Endo arterial),Endo-art
+cS02 (Endo capillary),Endo-cap
+cS03 (Endo capillary),Endo-cap
+cS04 (Endo),Endo-cap
+cS05 (Endo venous),Endo-ven
+cS06 (Endo lymphatic),Endo-lymph
+cS07 (Endo capillary-like),Endo-cap
+cS08 (Endo arterial-like),Endo-art
+cS09 (Endo),Endo
+cS10 (Endo tip cells),Endo-tip
+cS11 (Endo proif),Endo-prolif
+cS12 (Endo),Endo
+cS13 (Endo venous-like),Endo-ven
+cS14 (Endo),Endo
+cS15 (Pericyte),Pericyte
+cS16 (Pericyte),Pericyte
+cS17 (Pericyte),Pericyte
+cS18 (Pericyte),Pericyte
+cS19 (Pericyte),Pericyte
+cS21 (Fibro stem cell niche),Fibro-StemNiche
+cS22 (Fibro stem cell niche),Fibro-StemNiche
+cS23 (Fibro BMP-producing),Fibro-BMP
+cS24 (Fibro BMP-producing),Fibro-BMP
+cS25 (Fibro CCL8+),Fibro-CCL2
+cS26 (Myofibro),Fibro-myo
+cS27 (CXCL14+ CAF),Fibro-CXCL14
+cS28 (GREM1+ CAF),Fibro-GREM1
+cS29 (MMP3+ CAF),Fibro-MMP3
+cS30 (CAF CCL8 Fibro-like),Fibro-CCL2
+cS31 (CAF stem niche Fibro-like),Fibro-StemNiche
+cS32 (Smooth Muscle),SmoothMuscle
+cS33 (Schwann),Schwann
+cTNI01 (CD4+ IL7R+),Tcd4-IL7R
+cTNI02 (CD4+ IL7R+SELL+),Tcd4-IL7R
+cTNI03 (CD4+ IL7R+HSP+),Tcd4-IL7R
+cTNI04 (CD4+ IL7R+CCL5+),Tcd4-IL7R
+cTNI06 (CD4+ TFH),Tcd4-TFH
+cTNI07 (CD4+ CXCL13+),Tcd4-CXCL13
+cTNI08 (CD4+ Treg),Tcd4-Treg
+cTNI09 (CD4+ Treg prolif),Tcd4-Treg-prolif
+cTNI10 (CD8+ IL7R+),Tcd8-HOBIT
+cTNI11 (CD8+GZMK+),Tcd8-GZMK
+cTNI12 (CD8+ IL7R+),Tcd8-HOBIT
+cTNI14 (CD8+ CXCL13+),Tcd8-HOBIT
+cTNI15 (CD8+ CXCL13+ HSP+),Tcd8-CXCL13
+cTNI16 (CD8+ CXCL13+ prolif),Tcd8-CXCL13-prolif
+cTNI17 (gd-like T),Tcd8-gdlike
+cTNI18 (gd-like T PDCD1+),Tcd8-CXCL13-LAG3
+cTNI19 (gd-like T prolif),Tcd8-CXCL13-prolif
+cTNI20 (PLZF+ T),Tplzf-gdlike
+cTNI21 (PLZF+ T prolif),Tplzf-gdlike-prolif
+cTNI22 (cTNI22),NK-CD16
+cTNI23 (NK CD16A+),NK-CD16
+cTNI24 (NK GZMK+),NK-CD16
+cTNI25 (NK XCL1+),NK-XCL1
+cTNI26 (ILC3),ILC3

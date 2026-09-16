@@ -1,0 +1,61 @@
+pelka,type_lvl2,n,total,purity
+Mast,Mast,4173,4173,1
+cB1 (B IGD+IgM+),B,8078,8078,1
+cB2 (B GC-like),Bgc,6349,6349,1
+cB2 (B GC-like)_GPR183+,Bgc-GPR183,15356,15356,1
+cB3 (B CD40+ GC-like)_CD40+,Bgc-CD40,4336,4336,1
+cB3 (B CD40+ GC-like)_MK167+,Bgc-CD40-prolif,6335,6335,1
+cM02 (Macrophage-like)_2,Myeloid-Macro,47372,47372,1
+cM03 (DC1),Myeloid-DC1,154,154,1
+cM04 (DC2),Myeloid-DC2,8479,8479,1
+cM05 (DC2 C1Q+),Myeloid-DC2-C1Q,4621,4621,1
+cM07 (pDC),Myeloid-DC-pDC_ASDC,9687,9687,1
+cM08 (AS-DC),Myeloid-DC-pDC_ASDC,6,6,1
+cM09 (mregDC),Myeloid-DCmreg,13369,13369,1
+cM10 (Granulocyte),Myeloid-Granulo,5198,5198,1
+cS01/S08 (Endo arterial),Endo-art,19738,19738,1
+cS02/cS03/cS04/cS07 (Endo capillary),Endo-cap,32321,32321,1
+cS05/S13 (Endo venous),Endo-ven,58069,58069,1
+cS06 (Endo lymphatic),Endo-lymph,8875,8875,1
+cS09/12/14 Endo,Endo,23528,23528,1
+cS10 (Endo tip cells),Endo-tip,10503,10503,1
+cS11 (Endo proif),Endo-prolif,27519,27519,1
+cS15/16/17/18/19 (Pericyte),Pericyte,167322,167322,1
+cS21/cS22 (Fibro stem cell niche),Fibro-StemNiche,154432,154432,1
+cS23/cS24 (Fibro BMP-producing),Fibro-BMP,117786,117786,1
+cS25/cS30 (Fibro CCL8+),Fibro-CCL2,119662,119662,1
+cS26 (Myofibro),Fibro-myo,11715,11715,1
+cS27 (CXCL14+ CAF),Fibro-CXCL14,7884,7884,1
+cS28 (GREM1+ CAF),Fibro-GREM1,199695,199695,1
+cS29 (MMP3+ CAF),Fibro-MMP3,29326,29326,1
+cS31 (CAF stem niche Fibro-like),Fibro-StemNiche,53878,53878,1
+cS32 (Smooth Muscle),SmoothMuscle,155612,155612,1
+cS33 (Schwann),Schwann,13938,13938,1
+cTNI01 & 02 & 03 & 04 (CD4+ IL7R+),Tcd4-IL7R,16289,16289,1
+cTNI06 (CD4+ TFH),Tcd4-TFH,3531,3531,1
+cTNI07 (CD4+ CXCL13+),Tcd4-CXCL13,11493,11493,1
+cTNI08 (CD4+ Treg),Tcd4-Treg,30554,30554,1
+cTNI09 (CD4+ Treg prolif),Tcd4-Treg-prolif,1746,1746,1
+cTNI10 & 12 (CD8+ IL7R+),Tcd8-HOBIT,9334,9334,1
+cTNI11 (CD8+GZMK+),Tcd8-GZMK,10218,10218,1
+cTNI14 (CD8+ CXCL13+) & cTNI15 (CD8+ CXCL13+ HSP+),Tcd8-CXCL13,5751,5751,1
+cTNI16 (CD8+ CXCL13+ prolif),Tcd8-CXCL13-prolif,8825,8825,1
+cTNI17 (gd-like T),Tcd8-gdlike,1532,1532,1
+cTNI18 (gd-like T PDCD1+) & cTNI19 (gd-like T prolif),Tcd8-gdlike-PD1,4667,4667,1
+cTNI20 (PLZF+ T),Tplzf-gdlike,8837,8837,1
+cTNI21 (PLZF+ T prolif),Tplzf-gdlike-prolif,1325,1325,1
+cTNI22 (cTNI22),NK-CD16,36,36,1
+cTNI23 (NK CD16A+),NK-CD16,2975,2975,1
+cTNI24 (NK GZMK+),NK-CD16,2697,2697,1
+cTNI25 (NK XCL1+),NK-XCL1,904,904,1
+cTNI26 (ILC3),ILC3,2501,2501,1
+"pM01 (SEPP1, LYVE1)_macrophage",Myeloid-Macro-SEPP1-LYVE1,104667,104667,1
+pM05 (C1Q)_macrophage,Myeloid-Macro-prolif,5409,5409,1
+pM14 (VEGFA)_monocytes,Myeloid-Mono-VEGFA,8215,8215,1
+pM16 (S100)_monocytes,Myeloid-Mono-S100-VCAN,4410,4410,1
+pM20 (inflammatory)_macrophage,Myeloid-Macro-MMP9-APOE,69510,69510,1
+pM20 (inflammatory)_monocytes,Myeloid-inflamm,7239,7239,1
+pM21 (ISGs)_macrophage,Myeloid-ISGlow,61905,61905,1
+pM21 (ISGs)_monocytes,Myeloid-ISGhigh,6087,6087,1
+"pM22 (DC, MHCII)_macrophage",Myeloid-Macro-C1Q,13778,13778,1
+"pM22 (DC, MHCII)_monocytes",Myeloid-Mono-CSF1R,4722,4722,1
