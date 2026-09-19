@@ -17607,7 +17607,6 @@ Myeloid_fineTyping_all_genes.rds,C129_T_1_1_0_c1_v2,C129,Myeloid,cM01 (Monocyte)
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_0_c1_v2,C129,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-C1Q,scRNA,Myeloid-Macro-C1Q,"pM22 (DC, MHCII)_macrophage",Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_0_c1_v2,C129,Myeloid,cM02 (Macrophage-like),Myeloid-Macro,scRNA,Myeloid-Macro,cM02 (Macrophage-like)_2,Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_0_c1_v2,C129,Myeloid,cM09 (mregDC),Myeloid-DCmreg,scRNA,Myeloid-DCmreg,cM09 (mregDC),Myeloid,FALSE
-Myeloid_fineTyping_all_genes.rds,C129_T_1_1_0_c1_v2,C129,Myeloid,cM06 (DC IL22RA2),cM06 (DC IL22RA2),scRNA,,cM06 (DC IL22RA2),Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_0_c1_v2,C129,Myeloid,cM02 (Macrophage-like),Myeloid-Macro,scRNA,Myeloid-Macro,cM02 (Macrophage-like)_2,Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_0_c1_v2,C129,Myeloid,cM09 (mregDC),Myeloid-DCmreg,scRNA,Myeloid-DCmreg,cM09 (mregDC),Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_0_c1_v2,C129,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-C1Q,scRNA,Myeloid-Macro-C1Q,"pM22 (DC, MHCII)_macrophage",Myeloid,FALSE
@@ -17804,7 +17803,6 @@ Myeloid_fineTyping_all_genes.rds,C129_T_1_1_1_c1_v2,C129,Myeloid,cM02 (Macrophag
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_1_c1_v2,C129,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-SEPP1-LYVE1,scRNA,Myeloid-Macro-SEPP1-LYVE1,"pM01 (SEPP1, LYVE1)_macrophage",Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_1_c1_v2,C129,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-C1Q,scRNA,Myeloid-Macro-C1Q,"pM22 (DC, MHCII)_macrophage",Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_1_c1_v2,C129,Myeloid,cM05 (DC2 C1Q+),Myeloid-DC2-C1Q,scRNA,Myeloid-DC2-C1Q,cM05 (DC2 C1Q+),Myeloid,FALSE
-Myeloid_fineTyping_all_genes.rds,C129_T_1_1_1_c1_v2,C129,Myeloid,cM06 (DC IL22RA2),cM06 (DC IL22RA2),scRNA,,cM06 (DC IL22RA2),Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_1_c1_v2,C129,Myeloid,cM01 (Monocyte),Myeloid-Mono-S100-VCAN,scRNA,Myeloid-Mono-S100-VCAN,pM16 (S100)_monocytes,Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_1_c1_v2,C129,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-MMP9-APOE,scRNA,Myeloid-Macro-MMP9-APOE,pM20 (inflammatory)_macrophage,Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C129_T_1_1_1_c1_v2,C129,Myeloid,cM05 (DC2 C1Q+),Myeloid-DC2-C1Q,scRNA,Myeloid-DC2-C1Q,cM05 (DC2 C1Q+),Myeloid,FALSE
@@ -23575,7 +23573,6 @@ Myeloid_fineTyping_all_genes.rds,C147_T_1_1_1_c1_v2,C147,Myeloid,cM02 (Macrophag
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_0_c1_v2,C149,Myeloid,cM01 (Monocyte),Myeloid-Mono-S100-VCAN,scRNA,Myeloid-Mono-S100-VCAN,pM16 (S100)_monocytes,Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_0_c1_v2,C149,Myeloid,cM05 (DC2 C1Q+),Myeloid-DC2-C1Q,scRNA,Myeloid-DC2-C1Q,cM05 (DC2 C1Q+),Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_0_c1_v2,C149,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-prolif,scRNA,Myeloid-Macro-prolif,pM05 (C1Q)_macrophage,Myeloid,FALSE
-Myeloid_fineTyping_all_genes.rds,C149_T_1_1_0_c1_v2,C149,Myeloid,cM06 (DC IL22RA2),cM06 (DC IL22RA2),scRNA,,cM06 (DC IL22RA2),Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_0_c1_v2,C149,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-SEPP1-LYVE1,scRNA,Myeloid-Macro-SEPP1-LYVE1,"pM01 (SEPP1, LYVE1)_macrophage",Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_0_c1_v2,C149,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-C1Q,scRNA,Myeloid-Macro-C1Q,"pM22 (DC, MHCII)_macrophage",Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_0_c1_v2,C149,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-MMP9-APOE,scRNA,Myeloid-Macro-MMP9-APOE,pM20 (inflammatory)_macrophage,Myeloid,FALSE
@@ -23699,7 +23696,6 @@ Myeloid_fineTyping_all_genes.rds,C149_T_1_1_1_c1_v2,C149,Myeloid,cM02 (Macrophag
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_1_c1_v2,C149,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-SEPP1-LYVE1,scRNA,Myeloid-Macro-SEPP1-LYVE1,"pM01 (SEPP1, LYVE1)_macrophage",Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_1_c1_v2,C149,Myeloid,cM08 (AS-DC),Myeloid-DC-pDC_ASDC,scRNA,Myeloid-DC-pDC_ASDC,cM08 (AS-DC),Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_1_c1_v2,C149,Myeloid,cM02 (Macrophage-like),Myeloid-Macro-SEPP1-LYVE1,scRNA,Myeloid-Macro-SEPP1-LYVE1,"pM01 (SEPP1, LYVE1)_macrophage",Myeloid,FALSE
-Myeloid_fineTyping_all_genes.rds,C149_T_1_1_1_c1_v2,C149,Myeloid,cM06 (DC IL22RA2),cM06 (DC IL22RA2),scRNA,,cM06 (DC IL22RA2),Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_1_c1_v2,C149,Myeloid,cM04 (DC2),Myeloid-DC2,scRNA,Myeloid-DC2,cM04 (DC2),Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_1_c1_v2,C149,Myeloid,cM01 (Monocyte),Myeloid-Mono-S100-VCAN,scRNA,Myeloid-Mono-S100-VCAN,pM16 (S100)_monocytes,Myeloid,FALSE
 Myeloid_fineTyping_all_genes.rds,C149_T_1_1_1_c1_v2,C149,Myeloid,cM01 (Monocyte),Myeloid-ISGhigh,scRNA,Myeloid-ISGhigh,pM21 (ISGs)_monocytes,Myeloid,FALSE

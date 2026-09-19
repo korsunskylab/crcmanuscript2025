@@ -7,7 +7,6 @@ cM02 (Macrophage-like),Myeloid-ISGlow
 cM03 (DC1),Myeloid-DC1
 cM04 (DC2),Myeloid-DC2
 cM05 (DC2 C1Q+),Myeloid-DC2-C1Q
-cM06 (DC IL22RA2),cM06 (DC IL22RA2)
 cM07 (pDC),Myeloid-DC-pDC_ASDC
 cM08 (AS-DC),Myeloid-DC-pDC_ASDC
 cM09 (mregDC),Myeloid-DCmreg

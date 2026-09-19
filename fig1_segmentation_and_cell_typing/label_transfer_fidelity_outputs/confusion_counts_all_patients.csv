@@ -22,7 +22,6 @@ Myeloid,cM07 (pDC),Myeloid-DC-pDC_ASDC,709
 Myeloid,cM01 (Monocyte),Myeloid-inflamm,2429
 Myeloid,cM08 (AS-DC),Myeloid-DC-pDC_ASDC,48
 Myeloid,cM03 (DC1),Myeloid-DC1,179
-Myeloid,cM06 (DC IL22RA2),cM06 (DC IL22RA2),4
 Strom,cS32 (Smooth Muscle),SmoothMuscle,377
 Strom,cS06 (Endo lymphatic),Endo-lymph,151
 Strom,cS05 (Endo venous),Endo-ven,453
