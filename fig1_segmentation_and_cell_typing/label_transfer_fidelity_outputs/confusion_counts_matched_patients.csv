@@ -10,7 +10,7 @@ Myeloid,cM02 (Macrophage-like),Myeloid-Macro-C1Q,177
 Myeloid,cM09 (mregDC),Myeloid-DCmreg,100
 Myeloid,cM01 (Monocyte),Myeloid-Mono-S100-VCAN,146
 Myeloid,cM01 (Monocyte),Myeloid-inflamm,224
-Myeloid,cM02 (Macrophage-like),Myeloid-ISGlow,361
+Myeloid,cM02 (Macrophage-like),Myeloid-ISG,361
 Myeloid,cM08 (AS-DC),Myeloid-DC-pDC_ASDC,8
 Myeloid,cM02 (Macrophage-like),Myeloid-Macro,184
 Myeloid,cM04 (DC2),Myeloid-DC2,37

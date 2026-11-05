@@ -1,11 +1,11 @@
 old_label,lineage,new_label,N,dest,row_total,pct
 cM01 (Monocyte),Myeloid,Myeloid-ISGhigh,1016,Myeloid-inflamm,8755,11.6
-cM02 (Macrophage-like),Myeloid,Myeloid-Macro-C1Q,2255,Myeloid-ISGlow,12801,17.6
-cM02 (Macrophage-like),Myeloid,Myeloid-ISGlow,2819,Myeloid-ISGlow,12801,22
-cM02 (Macrophage-like),Myeloid,Myeloid-Macro,2303,Myeloid-ISGlow,12801,18
-cM02 (Macrophage-like),Myeloid,Myeloid-Macro-MMP9-APOE,2494,Myeloid-ISGlow,12801,19.5
-cM02 (Macrophage-like),Myeloid,Myeloid-Macro-prolif,327,Myeloid-ISGlow,12801,2.6
-cM02 (Macrophage-like),Myeloid,Myeloid-Macro-SEPP1-LYVE1,2603,Myeloid-ISGlow,12801,20.3
+cM02 (Macrophage-like),Myeloid,Myeloid-Macro-C1Q,2255,Myeloid-ISG,12801,17.6
+cM02 (Macrophage-like),Myeloid,Myeloid-ISG,2819,Myeloid-ISG,12801,22
+cM02 (Macrophage-like),Myeloid,Myeloid-Macro,2303,Myeloid-ISG,12801,18
+cM02 (Macrophage-like),Myeloid,Myeloid-Macro-MMP9-APOE,2494,Myeloid-ISG,12801,19.5
+cM02 (Macrophage-like),Myeloid,Myeloid-Macro-prolif,327,Myeloid-ISG,12801,2.6
+cM02 (Macrophage-like),Myeloid,Myeloid-Macro-SEPP1-LYVE1,2603,Myeloid-ISG,12801,20.3
 cM09 (mregDC),Myeloid,Myeloid-DCmreg,1136,Myeloid-DCmreg,1136,100
 cTNI01 (CD4+ IL7R+),TNKILC,Tcd8-CXCL13,7,Tcd4-IL7R,1000,0.7
 cTNI01 (CD4+ IL7R+),TNKILC,Tcd8-GZMK,16,Tcd4-IL7R,1000,1.6

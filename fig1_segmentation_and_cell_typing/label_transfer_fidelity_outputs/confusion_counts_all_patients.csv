@@ -7,7 +7,7 @@ B,cB3 (B CD40+ GC-like),Bgc-CD40,1825
 Myeloid,cM02 (Macrophage-like),Myeloid-Macro-C1Q,2255
 Myeloid,cM09 (mregDC),Myeloid-DCmreg,1136
 Myeloid,cM01 (Monocyte),Myeloid-Mono-S100-VCAN,1852
-Myeloid,cM02 (Macrophage-like),Myeloid-ISGlow,2819
+Myeloid,cM02 (Macrophage-like),Myeloid-ISG,2819
 Myeloid,cM01 (Monocyte),Myeloid-Mono-CSF1R,1283
 Myeloid,cM04 (DC2),Myeloid-DC2,565
 Myeloid,cM02 (Macrophage-like),Myeloid-Macro,2303
@@ -22,6 +22,7 @@ Myeloid,cM07 (pDC),Myeloid-DC-pDC_ASDC,709
 Myeloid,cM01 (Monocyte),Myeloid-inflamm,2429
 Myeloid,cM08 (AS-DC),Myeloid-DC-pDC_ASDC,48
 Myeloid,cM03 (DC1),Myeloid-DC1,179
+Myeloid,cM06 (DC IL22RA2),cM06 (DC IL22RA2),4
 Strom,cS32 (Smooth Muscle),SmoothMuscle,377
 Strom,cS06 (Endo lymphatic),Endo-lymph,151
 Strom,cS05 (Endo venous),Endo-ven,453
